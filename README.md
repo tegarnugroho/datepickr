@@ -15,7 +15,7 @@ Designed with responsive dialog layouts for both Material 2 and Material 3, supp
 - **Responsive Layouts**: Adapts smoothly to portrait and landscape modes across phone and tablet screens.
 - **Theme-agnostic**: Works directly with `Theme.of(context)` / `ColorScheme` without hardcoded app dependencies.
 - **Localization**: Respects Flutter's `Locale` and `MaterialLocalizations`, supporting custom month symbols.
-- **Widget & Function APIs**: Use as a tap-wrapper widget (`CustomDatePicker`) or invoke directly via `show...` dialog functions.
+- **Widget & Function APIs**: Use as a tap-wrapper widget (`DatePickr`) or invoke directly via `show...` dialog functions.
 
 ---
 
@@ -40,12 +40,12 @@ import 'package:datepickr/datepickr.dart';
 
 ## Usage
 
-### 1. Using the Widget Wrapper (`CustomDatePicker`)
+### 1. Using the Widget Wrapper (`DatePickr`)
 
 ```dart
 // Date Picker
-CustomDatePicker(
-  type: CustomDatePickerType.date,
+DatePickr(
+  type: DatePickrType.date,
   initialDate: DateTime.now(),
   onSelected: (DateTime date) {
     print('Selected Date: $date');
@@ -53,9 +53,22 @@ CustomDatePicker(
   child: const Text('Select Date'),
 )
 
+// Date Range Picker
+DatePickr(
+  type: DatePickrType.dateRange,
+  initialDateRange: DateTimeRange(
+    start: DateTime.now(),
+    end: DateTime.now().add(const Duration(days: 7)),
+  ),
+  onRangeSelected: (DateTimeRange range) {
+    print('Selected Range: $range');
+  },
+  child: const Text('Select Date Range'),
+)
+
 // Month & Year Picker
-CustomDatePicker(
-  type: CustomDatePickerType.month,
+DatePickr(
+  type: DatePickrType.month,
   initialDate: DateTime(2026, 5, 1),
   onSelected: (DateTime date) {
     print('Selected Month & Year: $date');
@@ -64,8 +77,8 @@ CustomDatePicker(
 )
 
 // Year Picker (Only Completed Past Years)
-CustomDatePicker(
-  type: CustomDatePickerType.year,
+DatePickr(
+  type: DatePickrType.year,
   onlyCompletedYears: true,
   initialDate: DateTime.now(),
   onSelected: (DateTime date) {
@@ -81,7 +94,7 @@ CustomDatePicker(
 
 #### Month & Year Picker:
 ```dart
-final result = await showCustomMonthYearPicker(
+final result = await showDatePickrMonthYear(
   context: context,
   initialDate: DateTime.now(),
   firstDate: DateTime(2020, 1, 1),
@@ -94,7 +107,7 @@ final result = await showCustomMonthYearPicker(
 
 #### Year Picker:
 ```dart
-final result = await showCustomYearPicker(
+final result = await showDatePickrYear(
   context: context,
   initialDate: DateTime.now(),
   onlyCompletedYears: true,
@@ -104,9 +117,22 @@ final result = await showCustomYearPicker(
 
 #### Date Picker:
 ```dart
-final result = await showCustomDatePicker(
+final result = await showDatePickr(
   context: context,
   initialDate: DateTime.now(),
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2030),
+);
+```
+
+#### Date Range Picker:
+```dart
+final result = await showDatePickrRange(
+  context: context,
+  initialDateRange: DateTimeRange(
+    start: DateTime.now(),
+    end: DateTime.now().add(const Duration(days: 7)),
+  ),
   firstDate: DateTime(2020),
   lastDate: DateTime(2030),
 );
@@ -116,23 +142,23 @@ final result = await showCustomDatePicker(
 
 ### 3. Normal vs Slider Style
 
-Both Month-Year and Year pickers support two display styles via `CustomDatePickerStyle`:
-- `CustomDatePickerStyle.normal`: Default grid-based view.
-- `CustomDatePickerStyle.slider`: Vertical wheel scroll view (Month and Year side-by-side columns for month picker, or single column for year picker).
+Both Month-Year and Year pickers support two display styles via `DatePickrStyle`:
+- `DatePickrStyle.normal`: Default grid-based view.
+- `DatePickrStyle.slider`: Vertical wheel scroll view (Month and Year side-by-side columns for month picker, or single column for year picker).
 
 ```dart
 // Using widget wrapper
-CustomDatePicker(
-  type: CustomDatePickerType.month,
-  style: CustomDatePickerStyle.slider, // or CustomDatePickerStyle.normal
+DatePickr(
+  type: DatePickrType.month,
+  style: DatePickrStyle.slider, // or DatePickrStyle.normal
   onSelected: (date) => print(date),
   child: const Text('Pick Month & Year'),
 )
 
 // Using dialog function
-final result = await showCustomMonthYearPicker(
+final result = await showDatePickrMonthYear(
   context: context,
-  style: CustomDatePickerStyle.slider,
+  style: DatePickrStyle.slider,
 );
 ```
 

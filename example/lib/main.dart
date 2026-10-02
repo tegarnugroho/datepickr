@@ -11,7 +11,7 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Date Picker Example',
+      title: 'DatePickr Example',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -136,9 +136,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     placeholder: 'Select date',
                     buttonLabel: 'Pick Date',
                     selectedText: _formatDate(_selectedDate),
-                    picker: CustomDatePicker(
+                    picker: DatePickr(
                       key: const Key('example_date_picker'),
-                      type: CustomDatePickerType.date,
+                      type: DatePickrType.date,
                       initialDate: _selectedDate ?? DateTime.now(),
                       onSelected: (date) {
                         setState(() => _selectedDate = date);
@@ -160,10 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     placeholder: 'Select month & year',
                     buttonLabel: 'Pick Month & Year',
                     selectedText: _formatMonthYear(_selectedMonthYearNormal),
-                    picker: CustomDatePicker(
+                    picker: DatePickr(
                       key: const Key('example_month_year_picker_normal'),
-                      type: CustomDatePickerType.month,
-                      style: CustomDatePickerStyle.normal,
+                      type: DatePickrType.month,
+                      style: DatePickrStyle.normal,
                       initialDate: _selectedMonthYearNormal ?? DateTime.now(),
                       onSelected: (date) {
                         setState(() => _selectedMonthYearNormal = date);
@@ -186,10 +186,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     placeholder: 'Select month & year',
                     buttonLabel: 'Pick Month & Year',
                     selectedText: _formatMonthYear(_selectedMonthYearSlider),
-                    picker: CustomDatePicker(
+                    picker: DatePickr(
                       key: const Key('example_month_year_picker_slider'),
-                      type: CustomDatePickerType.month,
-                      style: CustomDatePickerStyle.slider,
+                      type: DatePickrType.month,
+                      style: DatePickrStyle.slider,
                       initialDate: _selectedMonthYearSlider ?? DateTime.now(),
                       onSelected: (date) {
                         setState(() => _selectedMonthYearSlider = date);
@@ -212,10 +212,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     placeholder: 'Select year',
                     buttonLabel: 'Pick Year',
                     selectedText: _formatYear(_selectedYearNormal),
-                    picker: CustomDatePicker(
+                    picker: DatePickr(
                       key: const Key('example_year_picker_normal'),
-                      type: CustomDatePickerType.year,
-                      style: CustomDatePickerStyle.normal,
+                      type: DatePickrType.year,
+                      style: DatePickrStyle.normal,
                       onlyCompletedYears: true,
                       initialDate: _selectedYearNormal ?? DateTime.now(),
                       onSelected: (date) {
@@ -238,10 +238,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     placeholder: 'Select year',
                     buttonLabel: 'Pick Year',
                     selectedText: _formatYear(_selectedYearSlider),
-                    picker: CustomDatePicker(
+                    picker: DatePickr(
                       key: const Key('example_year_picker_slider'),
-                      type: CustomDatePickerType.year,
-                      style: CustomDatePickerStyle.slider,
+                      type: DatePickrType.year,
+                      style: DatePickrStyle.slider,
                       onlyCompletedYears: true,
                       initialDate: _selectedYearSlider ?? DateTime.now(),
                       onSelected: (date) {
@@ -264,9 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     placeholder: 'Select date range',
                     buttonLabel: 'Pick Date Range',
                     selectedText: _formatDateRange(_selectedDateRange),
-                    picker: CustomDatePicker(
+                    picker: DatePickr(
                       key: const Key('example_date_range_picker'),
-                      type: CustomDatePickerType.dateRange,
+                      type: DatePickrType.dateRange,
                       initialDateRange: _selectedDateRange,
                       onRangeSelected: (range) {
                         setState(() => _selectedDateRange = range);
