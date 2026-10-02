@@ -9,8 +9,9 @@ Designed with responsive dialog layouts for both Material 2 and Material 3, supp
 ## Features
 
 - **Date Picker**: Flexible date picker wrapping Flutter's native date picker with customizable defaults and themes.
-- **Month & Year Picker**: Interactive month and year selector returning `DateTime(year, month, 1)`. Includes year navigation, quick year switcher, and month grid.
-- **Year Picker**: Clean year selector returning `DateTime(year, 1, 1)`. Supports restricting selection to completed past years (`onlyCompletedYears`).
+- **Date Range Picker**: Native Material date range picker with theme customization.
+- **Month & Year Picker**: Interactive month and year selector returning `DateTime(year, month, 1)`. Includes year navigation, quick year switcher, and month grid or slider columns.
+- **Year Picker**: Clean year selector returning `DateTime(year, 1, 1)`. Supports restricting selection to completed past years (`onlyCompletedYears`) and normal grid or slider view.
 - **Responsive Layouts**: Adapts smoothly to portrait and landscape modes across phone and tablet screens.
 - **Theme-agnostic**: Works directly with `Theme.of(context)` / `ColorScheme` without hardcoded app dependencies.
 - **Localization**: Respects Flutter's `Locale` and `MaterialLocalizations`, supporting custom month symbols.

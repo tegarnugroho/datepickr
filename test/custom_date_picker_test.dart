@@ -482,5 +482,43 @@ void main() {
         expect(scrollableState.position.pixels, equals(initialOffset));
       }
     });
+
+    testWidgets('CustomDatePicker with dateRange opens date range picker',
+        (WidgetTester tester) async {
+      DateTimeRange? selectedRange;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomDatePicker(
+              type: CustomDatePickerType.dateRange,
+              initialDateRange: DateTimeRange(
+                start: DateTime(2026, 5, 1),
+                end: DateTime(2026, 5, 10),
+              ),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+              onRangeSelected: (range) {
+                selectedRange = range;
+              },
+              child: const Text('Pick Range'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Pick Range'));
+      await tester.pumpAndSettle();
+
+      // Verify date range picker is presented (Save button or calendar headers)
+      expect(find.text('Save'), findsOneWidget);
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(selectedRange, isNotNull);
+      expect(selectedRange?.start, equals(DateTime(2026, 5, 1)));
+      expect(selectedRange?.end, equals(DateTime(2026, 5, 10)));
+    });
   });
 }

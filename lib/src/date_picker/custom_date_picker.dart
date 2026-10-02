@@ -12,9 +12,12 @@ class CustomDatePicker extends StatelessWidget {
   const CustomDatePicker({
     super.key,
     required this.child,
-    required this.onSelected,
+    this.onSelected,
+    this.onRangeSelected,
     this.selectedDateTime,
     this.initialDate,
+    this.selectedDateRange,
+    this.initialDateRange,
     this.firstDate,
     this.lastDate,
     this.type = CustomDatePickerType.date,
@@ -30,14 +33,23 @@ class CustomDatePicker extends StatelessWidget {
   /// The child widget that triggers the picker when tapped.
   final Widget child;
 
-  /// Callback invoked when a date is selected and confirmed.
-  final void Function(DateTime) onSelected;
+  /// Callback invoked when a single date is selected and confirmed.
+  final void Function(DateTime)? onSelected;
+
+  /// Callback invoked when a date range is selected and confirmed.
+  final void Function(DateTimeRange)? onRangeSelected;
 
   /// Currently selected date/time.
   final DateTime? selectedDateTime;
 
   /// Initial date/time when picker opens.
   final DateTime? initialDate;
+
+  /// Currently selected date range.
+  final DateTimeRange? selectedDateRange;
+
+  /// Initial date range when picker opens.
+  final DateTimeRange? initialDateRange;
 
   /// Earliest selectable date.
   final DateTime? firstDate;
@@ -74,6 +86,25 @@ class CustomDatePicker extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {
+        if (type == CustomDatePickerType.dateRange) {
+          final rangeResult = await showCustomDateRangePicker(
+            context: context,
+            initialDateRange: initialDateRange,
+            firstDate: firstDate,
+            lastDate: lastDate,
+            selectedDateTimeRange: selectedDateRange,
+            confirmText: confirmText,
+            cancelText: cancelText,
+            locale: locale,
+            primaryColor: primaryColor,
+          );
+          if (rangeResult != null) {
+            onRangeSelected?.call(rangeResult);
+            onSelected?.call(rangeResult.start);
+          }
+          return;
+        }
+
         DateTime? result;
         if (type == CustomDatePickerType.date) {
           result = await showCustomDatePicker(
@@ -121,7 +152,7 @@ class CustomDatePicker extends StatelessWidget {
         }
 
         if (result != null) {
-          onSelected(result);
+          onSelected?.call(result);
         }
       },
       child: child,

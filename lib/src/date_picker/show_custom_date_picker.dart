@@ -51,3 +51,63 @@ Future<DateTime?> showCustomDatePicker({
         },
   );
 }
+
+/// Shows a Material Date Range Picker dialog.
+///
+/// Wraps Flutter's native [showDateRangePicker] while providing sensible defaults
+/// and theme customization.
+Future<DateTimeRange?> showCustomDateRangePicker({
+  required BuildContext context,
+  DateTimeRange? initialDateRange,
+  DateTime? firstDate,
+  DateTime? lastDate,
+  DateTimeRange? selectedDateTimeRange,
+  Locale? locale,
+  String? confirmText,
+  String? cancelText,
+  String? saveText,
+  String? errorFormatText,
+  String? errorInvalidText,
+  String? errorInvalidRangeText,
+  Color? primaryColor,
+  ThemeData? theme,
+  TransitionBuilder? builder,
+}) {
+  final now = DateTime.now();
+  final effectiveInitial = selectedDateTimeRange ?? initialDateRange;
+  final effectiveFirst =
+      firstDate ?? now.subtract(const Duration(days: 365 * 200));
+  final effectiveLast = lastDate ?? now.add(const Duration(days: 365 * 200));
+
+  return showDateRangePicker(
+    context: context,
+    initialDateRange: effectiveInitial,
+    firstDate: effectiveFirst,
+    lastDate: effectiveLast,
+    locale: locale,
+    confirmText: confirmText,
+    cancelText: cancelText,
+    saveText: saveText,
+    errorFormatText: errorFormatText,
+    errorInvalidText: errorInvalidText,
+    errorInvalidRangeText: errorInvalidRangeText,
+    builder: builder ??
+        (BuildContext context, Widget? child) {
+          if (theme != null) {
+            return Theme(data: theme, child: child!);
+          }
+          if (primaryColor != null) {
+            final currentTheme = Theme.of(context);
+            return Theme(
+              data: currentTheme.copyWith(
+                colorScheme: currentTheme.colorScheme.copyWith(
+                  primary: primaryColor,
+                ),
+              ),
+              child: child!,
+            );
+          }
+          return child!;
+        },
+  );
+}
