@@ -395,15 +395,16 @@ class _DatePickrMonthYearDialogState
     final surfaceColor = _surface(context);
     final textColor = _onSurface(context);
 
+    final theme = Theme.of(context);
     return Theme(
-      data: ThemeData.light().copyWith(
+      data: theme.copyWith(
         dividerColor: Colors.transparent,
         dividerTheme: const DividerThemeData(
           color: Colors.transparent,
           space: 0,
           thickness: 0,
         ),
-        colorScheme: ColorScheme.light(
+        colorScheme: theme.colorScheme.copyWith(
           primary: primaryColor,
           onPrimary: Colors.white,
           surface: surfaceColor,
