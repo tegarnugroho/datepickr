@@ -1,5 +1,5 @@
 name: datepickr
-description: A customizable Flutter date, month-year, and year picker package.
+description: A customizable Flutter date, date-range, month-year, and year picker package with responsive grid and slider styles.
 version: 0.0.1
 homepage: https://github.com
 
@@ -16,3 +16,17 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+
+screenshots:
+  - description: 'Date Range Picker (Custom Dialog)'
+    path: doc/screenshots/date_range_dialog.png
+  - description: 'Month & Year Picker (Slider Columns)'
+    path: doc/screenshots/month_year_slider.png
+  - description: 'Month & Year Picker (Normal Grid)'
+    path: doc/screenshots/month_year_grid.png
+  - description: 'Year Picker (Slider Column)'
+    path: doc/screenshots/year_slider.png
+  - description: 'Year Picker (Normal Grid)'
+    path: doc/screenshots/year_grid.png
+  - description: 'Date Range Picker (Fullscreen)'
+    path: doc/screenshots/date_range_fullscreen.png
