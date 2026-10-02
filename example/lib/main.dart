@@ -13,13 +13,27 @@ class ExampleApp extends StatelessWidget {
     return MaterialApp(
       title: 'DatePickr Example',
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF3B82F6),
+          brightness: Brightness.dark,
+          primary: const Color(0xFF3B82F6),
+          surface: const Color(0xFF1E293B),
+        ),
+      ),
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-          primary: const Color(0xFF2563EB),
-          surface: Colors.white,
+          seedColor: const Color(0xFF3B82F6),
+          brightness: Brightness.dark,
+          primary: const Color(0xFF3B82F6),
+          surface: const Color(0xFF1E293B),
         ),
       ),
       home: const HomeScreen(),
@@ -81,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFF0F172A),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
@@ -90,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Text(
               'PICKER EXAMPLES',
               style: TextStyle(
-                color: Color(0xFF2563EB),
+                color: Color(0xFF60A5FA),
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
@@ -100,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Text(
               'Date Picker Examples',
               style: TextStyle(
-                color: Color(0xFF0F172A),
+                color: Color(0xFFF8FAFC),
                 fontSize: 26.0,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
@@ -110,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const Text(
               'Basic examples of date pickers with different configurations.',
               style: TextStyle(
-                color: Color(0xFF64748B),
+                color: Color(0xFF94A3B8),
                 fontSize: 14.0,
               ),
             ),
@@ -307,9 +321,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       width: width,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(14.0),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: const Color(0xFF334155)),
       ),
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -323,14 +337,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 36.0,
                 height: 36.0,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFEFF6FF),
+                  color: Color(0x263B82F6),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   number,
                   style: const TextStyle(
-                    color: Color(0xFF2563EB),
+                    color: Color(0xFF60A5FA),
                     fontWeight: FontWeight.w700,
                     fontSize: 15.0,
                   ),
@@ -346,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: const TextStyle(
                         fontSize: 15.0,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: Color(0xFFF8FAFC),
                         height: 1.25,
                       ),
                     ),
@@ -355,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       description,
                       style: const TextStyle(
                         fontSize: 12.5,
-                        color: Color(0xFF64748B),
+                        color: Color(0xFF94A3B8),
                         height: 1.3,
                       ),
                     ),
@@ -385,9 +399,9 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 44.0,
             padding: const EdgeInsets.symmetric(horizontal: 14.0),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color(0xFF0F172A),
               borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: const Color(0xFFD1D5DB)),
+              border: Border.all(color: const Color(0xFF334155)),
             ),
             child: Row(
               children: [
@@ -397,8 +411,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(
                       fontSize: 13.5,
                       color: selectedText != null
-                          ? const Color(0xFF0F172A)
-                          : const Color(0xFF94A3B8),
+                          ? const Color(0xFFF8FAFC)
+                          : const Color(0xFF64748B),
                       fontWeight: selectedText != null
                           ? FontWeight.w500
                           : FontWeight.w400,
@@ -410,25 +424,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Icon(
                   Icons.calendar_today_outlined,
                   size: 18.0,
-                  color: Color(0xFF64748B),
+                  color: Color(0xFF94A3B8),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 12.0),
-          // Action Button with soft light blue background
+          // Action Button with subtle dark blue accent background
           Container(
             width: double.infinity,
             height: 42.0,
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: const Color(0x263B82F6),
               borderRadius: BorderRadius.circular(8.0),
             ),
             alignment: Alignment.center,
             child: Text(
               buttonLabel,
               style: const TextStyle(
-                color: Color(0xFF2563EB),
+                color: Color(0xFF60A5FA),
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
               ),
