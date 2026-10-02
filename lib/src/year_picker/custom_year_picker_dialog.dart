@@ -1,0 +1,361 @@
+import 'package:flutter/material.dart';
+
+/// Shows a dialog for picking a year.
+Future<DateTime?> showCustomYearPicker({
+  required BuildContext context,
+  DateTime? initialDate,
+  DateTime? firstDate,
+  DateTime? lastDate,
+  DateTime? selectedDateTime,
+  String? subTitle,
+  String? confirmText,
+  String? cancelText,
+  Locale? locale,
+  bool onlyCompletedYears = false,
+  Color? primaryColor,
+}) {
+  return showDialog<DateTime>(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return CustomYearPickerDialog(
+        initialDate: initialDate ?? DateTime.now(),
+        firstDate: firstDate,
+        lastDate: lastDate,
+        selectedDateTime: selectedDateTime,
+        subTitle: subTitle,
+        confirmText: confirmText,
+        cancelText: cancelText,
+        locale: locale,
+        onlyCompletedYears: onlyCompletedYears,
+        primaryColor: primaryColor,
+      );
+    },
+  );
+}
+
+/// Dialog widget for year selection.
+class CustomYearPickerDialog extends StatefulWidget {
+  const CustomYearPickerDialog({
+    super.key,
+    required this.initialDate,
+    this.firstDate,
+    this.lastDate,
+    this.selectedDateTime,
+    this.subTitle,
+    this.confirmText,
+    this.cancelText,
+    this.locale,
+    this.onlyCompletedYears = false,
+    this.primaryColor,
+  });
+
+  final DateTime initialDate;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+  final DateTime? selectedDateTime;
+  final String? subTitle;
+  final String? confirmText;
+  final String? cancelText;
+  final Locale? locale;
+  final bool onlyCompletedYears;
+  final Color? primaryColor;
+
+  @override
+  State<CustomYearPickerDialog> createState() => _CustomYearPickerDialogState();
+}
+
+class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
+  late DateTime _selectedDate;
+  late DateTime _resolvedFirstDate;
+  late DateTime _resolvedLastDate;
+
+  static const Size _portraitDialogSizeM2 = Size(330.0, 518.0);
+  static const Size _portraitDialogSizeM3 = Size(360.0, 568.0);
+  static const Size _landscapeDialogSize = Size(496.0, 346.0);
+
+  Color _primary(BuildContext context) =>
+      widget.primaryColor ?? Theme.of(context).colorScheme.primary;
+
+  Color _surface(BuildContext context) => Theme.of(context).colorScheme.surface;
+
+  Color _onSurface(BuildContext context) =>
+      Theme.of(context).colorScheme.onSurface;
+
+  Color _textGrey(BuildContext context) =>
+      Theme.of(context).colorScheme.onSurfaceVariant;
+
+  Size _dialogSize(BuildContext context) {
+    final bool useMaterial3 = Theme.of(context).useMaterial3;
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    return switch (orientation) {
+      Orientation.portrait =>
+        useMaterial3 ? _portraitDialogSizeM3 : _portraitDialogSizeM2,
+      Orientation.landscape => _landscapeDialogSize,
+    };
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    final effectiveSelected = widget.selectedDateTime ?? widget.initialDate;
+
+    _resolvedFirstDate =
+        widget.firstDate ?? DateTime(effectiveSelected.year - 100, 1, 1);
+
+    final DateTime defaultLastDate = widget.onlyCompletedYears
+        ? DateTime(now.year - 1, 12, 31)
+        : (effectiveSelected.year > now.year
+            ? DateTime(effectiveSelected.year, 12, 31)
+            : DateTime(now.year, 12, 31));
+
+    DateTime targetLastDate = widget.lastDate ?? defaultLastDate;
+    if (widget.onlyCompletedYears) {
+      final completedYearEnd = DateTime(now.year - 1, 12, 31);
+      if (targetLastDate.isAfter(completedYearEnd)) {
+        targetLastDate = completedYearEnd;
+      }
+    }
+
+    if (targetLastDate.isBefore(_resolvedFirstDate)) {
+      targetLastDate = _resolvedFirstDate;
+    }
+    _resolvedLastDate = targetLastDate;
+
+    DateTime initial = effectiveSelected;
+    if (initial.isBefore(_resolvedFirstDate)) {
+      initial = _resolvedFirstDate;
+    }
+    if (initial.isAfter(_resolvedLastDate)) {
+      initial = _resolvedLastDate;
+    }
+    _selectedDate = initial;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = _dialogSize(context);
+    final orientation = MediaQuery.orientationOf(context);
+    final surfaceColor = _surface(context);
+
+    return Dialog(
+      backgroundColor: surfaceColor,
+      surfaceTintColor: Colors.transparent,
+      elevation: 6,
+      clipBehavior: Clip.antiAlias,
+      insetPadding:
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28.0),
+      ),
+      child: AnimatedContainer(
+        width: size.width,
+        height: size.height,
+        duration: const Duration(milliseconds: 200),
+        child: orientation == Orientation.landscape
+            ? _buildLandscapeLayout()
+            : _buildPortraitLayout(),
+      ),
+    );
+  }
+
+  Widget _buildLandscapeLayout() {
+    final dividerColor = _textGrey(context).withOpacity(0.12);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildLandscapeHeader(),
+        VerticalDivider(
+          width: 1,
+          thickness: 1,
+          color: dividerColor,
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _buildYearPicker()),
+              _buildActions(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPortraitLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildPortraitHeader(),
+        Expanded(child: _buildYearPicker()),
+        _buildActions(),
+      ],
+    );
+  }
+
+  Widget _buildLandscapeHeader() {
+    final primaryColor = _primary(context);
+    final textColor = _onSurface(context);
+    final subtitleColor = _textGrey(context);
+
+    return Container(
+      width: 152.0,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.subTitle ?? 'Choose Year',
+            style: TextStyle(
+              fontSize: 12.0,
+              fontWeight: FontWeight.w600,
+              color: subtitleColor,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${_selectedDate.year}',
+            style: TextStyle(
+              fontSize: 24.0,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
+          ),
+          const Spacer(),
+          Icon(
+            Icons.calendar_month_outlined,
+            size: 24.0,
+            color: primaryColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPortraitHeader() {
+    final primaryColor = _primary(context);
+    final textColor = _onSurface(context);
+    final subtitleColor = _textGrey(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.subTitle ?? 'Choose Year',
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w600,
+                    color: subtitleColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4.0),
+                Text(
+                  '${_selectedDate.year}',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: Icon(
+              Icons.calendar_month_outlined,
+              size: 20.0,
+              color: primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYearPicker() {
+    final primaryColor = _primary(context);
+    final surfaceColor = _surface(context);
+    final textColor = _onSurface(context);
+
+    return Theme(
+      data: ThemeData.light().copyWith(
+        dividerColor: Colors.transparent,
+        dividerTheme: const DividerThemeData(
+          color: Colors.transparent,
+          space: 0,
+          thickness: 0,
+        ),
+        colorScheme: ColorScheme.light(
+          primary: primaryColor,
+          onPrimary: Colors.white,
+          surface: surfaceColor,
+          onSurface: textColor,
+        ),
+      ),
+      child: YearPicker(
+        firstDate: _resolvedFirstDate,
+        lastDate: _resolvedLastDate,
+        selectedDate: _selectedDate,
+        onChanged: (DateTime dateTime) {
+          setState(() {
+            _selectedDate = dateTime;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildActions() {
+    final primaryColor = _primary(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            key: const Key('custom_month_year_picker_cancel_button'),
+            onPressed: () => Navigator.of(context).pop(null),
+            child: Text(
+              widget.cancelText ?? 'Cancel',
+              style: TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            key: const Key('custom_month_year_picker_confirm_button'),
+            onPressed: () {
+              Navigator.of(context).pop(DateTime(_selectedDate.year, 1, 1));
+            },
+            child: Text(
+              widget.confirmText ?? 'OK',
+              style: TextStyle(
+                color: primaryColor,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
