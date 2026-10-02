@@ -13,7 +13,7 @@ void main() {
   testWidgets('example app displays date picker demos', (WidgetTester tester) async {
     await tester.pumpWidget(const ExampleApp());
 
-    expect(find.text('Picker Examples'), findsOneWidget);
+    expect(find.text('Date Picker Examples'), findsOneWidget);
     expect(find.text('Pick Date'), findsOneWidget);
   });
 }
