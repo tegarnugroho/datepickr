@@ -82,7 +82,7 @@ class DatePickrYearDialog extends StatefulWidget {
 typedef CustomYearPickerDialog = DatePickrYearDialog;
 
 class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
-  late DateTime _selectedDate;
+  late final ValueNotifier<DateTime> _selectedDateNotifier;
   late DateTime _resolvedFirstDate;
   late DateTime _resolvedLastDate;
   FixedExtentScrollController? _yearScrollController;
@@ -153,13 +153,13 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
     if (initial.isAfter(_resolvedLastDate)) {
       initial = _resolvedLastDate;
     }
-    _selectedDate = initial;
+    _selectedDateNotifier = ValueNotifier<DateTime>(initial);
 
     if (widget.style == DatePickrStyle.slider) {
       final maxIndex =
           math.max<int>(0, _resolvedLastDate.year - _resolvedFirstDate.year);
       final initialYearIndex =
-          (_selectedDate.year - _resolvedFirstDate.year).clamp(0, maxIndex);
+          (initial.year - _resolvedFirstDate.year).clamp(0, maxIndex);
       _yearScrollController = FixedExtentScrollController(
         initialItem: initialYearIndex.toInt(),
       );
@@ -168,6 +168,7 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
 
   @override
   void dispose() {
+    _selectedDateNotifier.dispose();
     _yearScrollController?.dispose();
     super.dispose();
   }
@@ -263,12 +264,15 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            '${_selectedDate.year}',
-            style: TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.w700,
-              color: textColor,
+          ValueListenableBuilder<DateTime>(
+            valueListenable: _selectedDateNotifier,
+            builder: (context, selectedDate, _) => Text(
+              '${selectedDate.year}',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
             ),
           ),
           const Spacer(),
@@ -306,14 +310,17 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
                   ),
                 ),
                 const SizedBox(height: 4.0),
-                Text(
-                  '${_selectedDate.year}',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
+                ValueListenableBuilder<DateTime>(
+                  valueListenable: _selectedDateNotifier,
+                  builder: (context, selectedDate, _) => Text(
+                    '${selectedDate.year}',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w700,
+                      color: textColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -336,15 +343,18 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
   }
 
   Widget _buildYearPicker() {
-    return DatePickrYearGrid(
-      firstDate: _resolvedFirstDate,
-      lastDate: _resolvedLastDate,
-      selectedDate: _selectedDate,
-      primaryColor: _primary(context),
-      onChanged: (DateTime dateTime) {
-        setState(() {
-          _selectedDate = dateTime;
-        });
+    return ValueListenableBuilder<DateTime>(
+      valueListenable: _selectedDateNotifier,
+      builder: (context, selectedDate, _) {
+        return DatePickrYearGrid(
+          firstDate: _resolvedFirstDate,
+          lastDate: _resolvedLastDate,
+          selectedDate: selectedDate,
+          primaryColor: _primary(context),
+          onChanged: (DateTime dateTime) {
+            _selectedDateNotifier.value = dateTime;
+          },
+        );
       },
     );
   }
@@ -375,14 +385,14 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
       childCount: yearCount,
       onSelectedItemChanged: (int index) {
         final year = _resolvedFirstDate.year + index;
-        setState(() {
-          _selectedDate =
-              DateTime(year, _selectedDate.month, _selectedDate.day);
-        });
+        _selectedDateNotifier.value = DateTime(
+          year,
+          _selectedDateNotifier.value.month,
+          _selectedDateNotifier.value.day,
+        );
       },
       itemBuilder: (context, index) {
         final year = _resolvedFirstDate.year + index;
-        final isSelected = year == _selectedDate.year;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
@@ -393,13 +403,20 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
             );
           },
           child: Center(
-            child: Text(
-              '$year',
-              style: TextStyle(
-                fontSize: isSelected ? 19.0 : 16.0,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? primaryColor : textColor.withOpacity(0.65),
-              ),
+            child: ValueListenableBuilder<DateTime>(
+              valueListenable: _selectedDateNotifier,
+              builder: (context, selectedDate, _) {
+                final isSelected = year == selectedDate.year;
+                return Text(
+                  '$year',
+                  style: TextStyle(
+                    fontSize: isSelected ? 19.0 : 16.0,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color:
+                        isSelected ? primaryColor : textColor.withOpacity(0.65),
+                  ),
+                );
+              },
             ),
           ),
         );
@@ -430,7 +447,9 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
           TextButton(
             key: const Key('custom_month_year_picker_confirm_button'),
             onPressed: () {
-              Navigator.of(context).pop(DateTime(_selectedDate.year, 1, 1));
+              Navigator.of(context).pop(
+                DateTime(_selectedDateNotifier.value.year, 1, 1),
+              );
             },
             child: Text(
               widget.confirmText ?? 'OK',

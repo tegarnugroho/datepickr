@@ -87,13 +87,108 @@ class DatePickrMonthYearDialog extends StatefulWidget {
 /// Backwards compatibility alias for [DatePickrMonthYearDialog].
 typedef CustomMonthYearPickerDialog = DatePickrMonthYearDialog;
 
+class _MonthYearSelectionModel extends ChangeNotifier {
+  _MonthYearSelectionModel({
+    required int initialYear,
+    required int initialMonth,
+    required this.firstDate,
+    required this.lastDate,
+  })  : _selectedYear = initialYear,
+        _selectedMonth = initialMonth;
+
+  final DateTime firstDate;
+  final DateTime lastDate;
+
+  int _selectedYear;
+  int _selectedMonth;
+  bool _isYearSelecting = false;
+
+  int get selectedYear => _selectedYear;
+  int get selectedMonth => _selectedMonth;
+  bool get isYearSelecting => _isYearSelecting;
+
+  bool get isPrevYearDisabled => _selectedYear <= firstDate.year;
+  bool get isNextYearDisabled => _selectedYear >= lastDate.year;
+
+  bool isMonthDisabled(int month) => DatePickrUtils.isMonthDisabled(
+        month: month,
+        selectedYear: _selectedYear,
+        firstDate: firstDate,
+        lastDate: lastDate,
+      );
+
+  void selectMonth(int month) {
+    if (_selectedMonth != month && !isMonthDisabled(month)) {
+      _selectedMonth = month;
+      notifyListeners();
+    }
+  }
+
+  void changeYear(int delta) {
+    final target = _selectedYear + delta;
+    if (target >= firstDate.year && target <= lastDate.year) {
+      _selectedYear = target;
+      _clampSelection();
+      notifyListeners();
+    }
+  }
+
+  void selectYear(int year) {
+    final clamped = year.clamp(firstDate.year, lastDate.year);
+    _selectedYear = clamped;
+    _isYearSelecting = false;
+    _clampSelection();
+    notifyListeners();
+  }
+
+  void setYearSelecting(bool value) {
+    if (_isYearSelecting != value) {
+      _isYearSelecting = value;
+      notifyListeners();
+    }
+  }
+
+  void setSliderMonth(int month) {
+    if (_selectedMonth != month) {
+      _selectedMonth = month;
+      notifyListeners();
+    }
+  }
+
+  void setSliderYear(int year, VoidCallback? onMonthClamped) {
+    if (_selectedYear != year) {
+      _selectedYear = year;
+      final prevMonth = _selectedMonth;
+      _clampSelection();
+      if (_selectedMonth != prevMonth) {
+        onMonthClamped?.call();
+      }
+      notifyListeners();
+    }
+  }
+
+  void clampSelection() {
+    _clampSelection();
+  }
+
+  void _clampSelection() {
+    _selectedYear = _selectedYear.clamp(firstDate.year, lastDate.year);
+    if (isMonthDisabled(_selectedMonth)) {
+      _selectedMonth = DatePickrUtils.getTargetValidMonth(
+        currentMonth: _selectedMonth,
+        selectedYear: _selectedYear,
+        firstDate: firstDate,
+        lastDate: lastDate,
+      );
+    }
+  }
+}
+
 class _DatePickrMonthYearDialogState
     extends State<DatePickrMonthYearDialog> {
-  late int _selectedYear;
-  late int _selectedMonth;
+  late final _MonthYearSelectionModel _model;
   late DateTime _resolvedFirstDate;
   late DateTime _resolvedLastDate;
-  bool _isYearSelecting = false;
   FixedExtentScrollController? _monthScrollController;
   FixedExtentScrollController? _yearScrollController;
 
@@ -138,91 +233,10 @@ class _DatePickrMonthYearDialogState
   List<String> get _fullMonths =>
       DatePickrUtils.getFullMonths(_effectiveLocale);
 
-  @override
-  void initState() {
-    super.initState();
-    final now = DateTime.now();
-    final effective = widget.selectedDateTime ?? widget.initialDate;
-    _selectedYear = effective.year;
-    _selectedMonth = effective.month;
-
-    _resolvedFirstDate =
-        widget.firstDate ?? DateTime(effective.year - 100, 1, 1);
-
-    final maxAllowed = widget.onlyCompletedYears
-        ? DateTime(now.year - 1, 12, 31)
-        : (effective.isAfter(now)
-            ? DateTime(effective.year, effective.month)
-            : now);
-
-    DateTime candidate = widget.lastDate ?? maxAllowed;
-    if (widget.onlyCompletedYears && candidate.isAfter(maxAllowed)) {
-      candidate = maxAllowed;
-    }
-    _resolvedLastDate =
-        candidate.isBefore(_resolvedFirstDate) ? _resolvedFirstDate : candidate;
-
-    _clampSelection();
-
-    if (widget.style == DatePickrStyle.slider) {
-      _monthScrollController = FixedExtentScrollController(
-        initialItem: (_selectedMonth - 1).clamp(0, 11),
-      );
-      final maxIndex =
-          math.max<int>(0, _resolvedLastDate.year - _resolvedFirstDate.year);
-      final initialYearIndex =
-          (_selectedYear - _resolvedFirstDate.year).clamp(0, maxIndex);
-      _yearScrollController = FixedExtentScrollController(
-        initialItem: initialYearIndex.toInt(),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _monthScrollController?.dispose();
-    _yearScrollController?.dispose();
-    super.dispose();
-  }
-
-  void _clampSelection() {
-    _selectedYear = _selectedYear.clamp(
-      _resolvedFirstDate.year,
-      _resolvedLastDate.year,
-    );
-    if (_isMonthDisabled(_selectedMonth)) {
-      _selectedMonth = DatePickrUtils.getTargetValidMonth(
-        currentMonth: _selectedMonth,
-        selectedYear: _selectedYear,
-        firstDate: _resolvedFirstDate,
-        lastDate: _resolvedLastDate,
-      );
-    }
-  }
-
-  bool _isMonthDisabled(int month) =>
-      DatePickrUtils.isMonthDisabled(
-        month: month,
-        selectedYear: _selectedYear,
-        firstDate: _resolvedFirstDate,
-        lastDate: _resolvedLastDate,
-      );
-
-  bool get _isPrevYearDisabled => _selectedYear <= _resolvedFirstDate.year;
-  bool get _isNextYearDisabled => _selectedYear >= _resolvedLastDate.year;
-
-  void _changeYear(int delta) {
-    setState(() {
-      _selectedYear += delta;
-      _clampSelection();
-    });
-  }
-
-  String get _displayTitle {
-    final name = _fullMonths.length >= _selectedMonth
-        ? _fullMonths[_selectedMonth - 1]
-        : '$_selectedMonth';
-    return '$name $_selectedYear';
+  String _displayTitle(int month, int year) {
+    final name =
+        _fullMonths.length >= month ? _fullMonths[month - 1] : '$month';
+    return '$name $year';
   }
 
   @override
@@ -268,11 +282,17 @@ class _DatePickrMonthYearDialogState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: widget.style == DatePickrStyle.slider
-                    ? _buildMonthYearSlider()
-                    : (_isYearSelecting
+                child: ListenableBuilder(
+                  listenable: _model,
+                  builder: (context, _) {
+                    if (widget.style == DatePickrStyle.slider) {
+                      return _buildMonthYearSlider();
+                    }
+                    return _model.isYearSelecting
                         ? _buildYearPicker()
-                        : _buildMonthPicker()),
+                        : _buildMonthPicker();
+                  },
+                ),
               ),
               _buildActions(),
             ],
@@ -288,9 +308,17 @@ class _DatePickrMonthYearDialogState
       children: [
         _buildPortraitHeader(),
         Expanded(
-          child: widget.style == DatePickrStyle.slider
-              ? _buildMonthYearSlider()
-              : (_isYearSelecting ? _buildYearPicker() : _buildMonthPicker()),
+          child: ListenableBuilder(
+            listenable: _model,
+            builder: (context, _) {
+              if (widget.style == DatePickrStyle.slider) {
+                return _buildMonthYearSlider();
+              }
+              return _model.isYearSelecting
+                  ? _buildYearPicker()
+                  : _buildMonthPicker();
+            },
+          ),
         ),
         _buildActions(),
       ],
@@ -318,12 +346,15 @@ class _DatePickrMonthYearDialogState
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            _displayTitle,
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w700,
-              color: textColor,
+          ListenableBuilder(
+            listenable: _model,
+            builder: (context, _) => Text(
+              _displayTitle(_model.selectedMonth, _model.selectedYear),
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
             ),
           ),
           const Spacer(),
@@ -361,14 +392,17 @@ class _DatePickrMonthYearDialogState
                   ),
                 ),
                 const SizedBox(height: 4.0),
-                Text(
-                  _displayTitle,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
+                ListenableBuilder(
+                  listenable: _model,
+                  builder: (context, _) => Text(
+                    _displayTitle(_model.selectedMonth, _model.selectedYear),
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w700,
+                      color: textColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -414,13 +448,9 @@ class _DatePickrMonthYearDialogState
       child: YearPicker(
         firstDate: _resolvedFirstDate,
         lastDate: _resolvedLastDate,
-        selectedDate: DateTime(_selectedYear, 1, 1),
+        selectedDate: DateTime(_model.selectedYear, 1, 1),
         onChanged: (dateTime) {
-          setState(() {
-            _selectedYear = dateTime.year;
-            _isYearSelecting = false;
-            _clampSelection();
-          });
+          _model.selectYear(dateTime.year);
         },
       ),
     );
@@ -435,110 +465,121 @@ class _DatePickrMonthYearDialogState
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                icon: Icon(
-                  Icons.chevron_left,
-                  color: _isPrevYearDisabled
-                      ? subtitleColor.withOpacity(0.3)
-                      : textColor,
-                ),
-                onPressed: _isPrevYearDisabled ? null : () => _changeYear(-1),
-              ),
-              InkWell(
-                onTap: () => setState(() => _isYearSelecting = true),
-                borderRadius: BorderRadius.circular(4.0),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 4.0,
+          child: ListenableBuilder(
+            listenable: _model,
+            builder: (context, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    Icons.chevron_left,
+                    color: _model.isPrevYearDisabled
+                        ? subtitleColor.withOpacity(0.3)
+                        : textColor,
                   ),
-                  child: Row(
-                    children: [
-                      Text(
-                        '$_selectedYear',
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                          color: textColor,
+                  onPressed: _model.isPrevYearDisabled
+                      ? null
+                      : () => _model.changeYear(-1),
+                ),
+                InkWell(
+                  onTap: () => _model.setYearSelecting(true),
+                  borderRadius: BorderRadius.circular(4.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${_model.selectedYear}',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                            color: textColor,
+                          ),
                         ),
-                      ),
-                      Icon(
-                        Icons.arrow_drop_down,
-                        color: textColor,
-                        size: 20.0,
-                      ),
-                    ],
+                        Icon(
+                          Icons.arrow_drop_down,
+                          color: textColor,
+                          size: 20.0,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                icon: Icon(
-                  Icons.chevron_right,
-                  color: _isNextYearDisabled
-                      ? subtitleColor.withOpacity(0.3)
-                      : textColor,
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    Icons.chevron_right,
+                    color: _model.isNextYearDisabled
+                        ? subtitleColor.withOpacity(0.3)
+                        : textColor,
+                  ),
+                  onPressed: _model.isNextYearDisabled
+                      ? null
+                      : () => _model.changeYear(1),
                 ),
-                onPressed: _isNextYearDisabled ? null : () => _changeYear(1),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 2.2,
-                crossAxisSpacing: 6,
-                mainAxisSpacing: 6,
-              ),
-              itemCount: 12,
-              itemBuilder: (context, index) {
-                final month = index + 1;
-                final isSelected = month == _selectedMonth;
-                final isDisabled = _isMonthDisabled(month);
-                final monthName = _shortMonths.length >= month
-                    ? _shortMonths[month - 1]
-                    : '$month';
+            child: ListenableBuilder(
+              listenable: _model,
+              builder: (context, _) => GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 2.2,
+                  crossAxisSpacing: 6,
+                  mainAxisSpacing: 6,
+                ),
+                itemCount: 12,
+                itemBuilder: (context, index) {
+                  final month = index + 1;
+                  final isSelected = month == _model.selectedMonth;
+                  final isDisabled = _model.isMonthDisabled(month);
+                  final monthName = _shortMonths.length >= month
+                      ? _shortMonths[month - 1]
+                      : '$month';
 
-                final itemTextColor = isSelected
-                    ? Colors.white
-                    : (isDisabled
-                        ? subtitleColor.withOpacity(0.35)
-                        : textColor);
-                final bgColor = isSelected ? primaryColor : Colors.transparent;
+                  final itemTextColor = isSelected
+                      ? Colors.white
+                      : (isDisabled
+                          ? subtitleColor.withOpacity(0.35)
+                          : textColor);
+                  final bgColor =
+                      isSelected ? primaryColor : Colors.transparent;
 
-                return Material(
-                  color: bgColor,
-                  borderRadius: BorderRadius.circular(5.0),
-                  child: InkWell(
+                  return Material(
+                    color: bgColor,
                     borderRadius: BorderRadius.circular(5.0),
-                    onTap: isDisabled
-                        ? null
-                        : () => setState(() => _selectedMonth = month),
-                    child: Center(
-                      child: Text(
-                        monthName,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w500,
-                          color: itemTextColor,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(5.0),
+                      onTap: isDisabled
+                          ? null
+                          : () => _model.selectMonth(month),
+                      child: Center(
+                        child: Text(
+                          monthName,
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: itemTextColor,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -579,22 +620,13 @@ class _DatePickrMonthYearDialogState
               ),
               childCount: 12,
               onSelectedItemChanged: (int index) {
-                final month = index + 1;
-                setState(() {
-                  _selectedMonth = month;
-                });
+                _model.setSliderMonth(index + 1);
               },
               itemBuilder: (context, index) {
                 final month = index + 1;
-                final isSelected = month == _selectedMonth;
-                final isDisabled = _isMonthDisabled(month);
                 final monthName = _fullMonths.length >= month
                     ? _fullMonths[month - 1]
                     : '$month';
-
-                final itemTextColor = isDisabled
-                    ? subtitleColor.withOpacity(0.3)
-                    : (isSelected ? primaryColor : textColor.withOpacity(0.65));
 
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -606,14 +638,26 @@ class _DatePickrMonthYearDialogState
                     );
                   },
                   child: Center(
-                    child: Text(
-                      monthName,
-                      style: TextStyle(
-                        fontSize: isSelected ? 17.0 : 15.0,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: itemTextColor,
-                      ),
+                    child: ListenableBuilder(
+                      listenable: _model,
+                      builder: (context, _) {
+                        final isSelected = month == _model.selectedMonth;
+                        final isDisabled = _model.isMonthDisabled(month);
+                        final itemTextColor = isDisabled
+                            ? subtitleColor.withOpacity(0.3)
+                            : (isSelected
+                                ? primaryColor
+                                : textColor.withOpacity(0.65));
+                        return Text(
+                          monthName,
+                          style: TextStyle(
+                            fontSize: isSelected ? 17.0 : 15.0,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: itemTextColor,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );
@@ -650,25 +694,14 @@ class _DatePickrMonthYearDialogState
               childCount: yearCount,
               onSelectedItemChanged: (int index) {
                 final year = _resolvedFirstDate.year + index;
-                setState(() {
-                  _selectedYear = year;
-                  if (_isMonthDisabled(_selectedMonth)) {
-                    _selectedMonth =
-                        DatePickrUtils.getTargetValidMonth(
-                      currentMonth: _selectedMonth,
-                      selectedYear: _selectedYear,
-                      firstDate: _resolvedFirstDate,
-                      lastDate: _resolvedLastDate,
-                    );
-                    if (_monthScrollController?.hasClients ?? false) {
-                      _monthScrollController?.jumpToItem(_selectedMonth - 1);
-                    }
+                _model.setSliderYear(year, () {
+                  if (_monthScrollController?.hasClients ?? false) {
+                    _monthScrollController?.jumpToItem(_model.selectedMonth - 1);
                   }
                 });
               },
               itemBuilder: (context, index) {
                 final year = _resolvedFirstDate.year + index;
-                final isSelected = year == _selectedYear;
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
@@ -679,16 +712,22 @@ class _DatePickrMonthYearDialogState
                     );
                   },
                   child: Center(
-                    child: Text(
-                      '$year',
-                      style: TextStyle(
-                        fontSize: isSelected ? 18.0 : 16.0,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected
-                            ? primaryColor
-                            : textColor.withOpacity(0.65),
-                      ),
+                    child: ListenableBuilder(
+                      listenable: _model,
+                      builder: (context, _) {
+                        final isSelected = year == _model.selectedYear;
+                        return Text(
+                          '$year',
+                          style: TextStyle(
+                            fontSize: isSelected ? 18.0 : 16.0,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected
+                                ? primaryColor
+                                : textColor.withOpacity(0.65),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );
@@ -703,7 +742,6 @@ class _DatePickrMonthYearDialogState
   Widget _buildActions() {
     final primaryColor = _primary(context);
     final subtitleColor = _textGrey(context);
-    final isConfirmDisabled = _isMonthDisabled(_selectedMonth);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -722,22 +760,29 @@ class _DatePickrMonthYearDialogState
             ),
           ),
           const SizedBox(width: 8),
-          TextButton(
-            key: const Key('custom_month_year_picker_confirm_button'),
-            onPressed: isConfirmDisabled
-                ? null
-                : () => Navigator.of(context).pop(
-                      DateTime(_selectedYear, _selectedMonth, 1),
-                    ),
-            child: Text(
-              widget.confirmText ?? 'OK',
-              style: TextStyle(
-                color: isConfirmDisabled
-                    ? subtitleColor.withOpacity(0.4)
-                    : primaryColor,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+          ListenableBuilder(
+            listenable: _model,
+            builder: (context, _) {
+              final isConfirmDisabled =
+                  _model.isMonthDisabled(_model.selectedMonth);
+              return TextButton(
+                key: const Key('custom_month_year_picker_confirm_button'),
+                onPressed: isConfirmDisabled
+                    ? null
+                    : () => Navigator.of(context).pop(
+                          DateTime(_model.selectedYear, _model.selectedMonth, 1),
+                        ),
+                child: Text(
+                  widget.confirmText ?? 'OK',
+                  style: TextStyle(
+                    color: isConfirmDisabled
+                        ? subtitleColor.withOpacity(0.4)
+                        : primaryColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
