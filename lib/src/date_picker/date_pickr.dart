@@ -28,6 +28,7 @@ class DatePickr extends StatelessWidget {
     this.locale,
     this.onlyCompletedYears = false,
     this.primaryColor,
+    this.fullScreen = true,
   });
 
   /// The child widget that triggers the picker when tapped.
@@ -81,6 +82,11 @@ class DatePickr extends StatelessWidget {
   /// Optional override for the primary theme color.
   final Color? primaryColor;
 
+  /// Whether the date range picker should open in fullscreen mode.
+  ///
+  /// Defaults to `true`. If set to `false`, it opens as a centered dialog.
+  final bool fullScreen;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -93,10 +99,12 @@ class DatePickr extends StatelessWidget {
             firstDate: firstDate,
             lastDate: lastDate,
             selectedDateTimeRange: selectedDateRange,
+            subTitle: subTitle,
             confirmText: confirmText,
             cancelText: cancelText,
             locale: locale,
             primaryColor: primaryColor,
+            fullScreen: fullScreen,
           );
           if (rangeResult != null) {
             onRangeSelected?.call(rangeResult);

@@ -521,6 +521,51 @@ void main() {
       expect(selectedRange?.end, equals(DateTime(2026, 5, 10)));
     });
 
+    testWidgets('DatePickr with dateRange and fullScreen: false opens dialog mode',
+        (WidgetTester tester) async {
+      DateTimeRange? selectedRange;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DatePickr(
+              type: DatePickrType.dateRange,
+              fullScreen: false,
+              initialDateRange: DateTimeRange(
+                start: DateTime(2026, 6, 1),
+                end: DateTime(2026, 6, 15),
+              ),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+              onRangeSelected: (range) {
+                selectedRange = range;
+              },
+              child: const Text('Pick Range Dialog'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Pick Range Dialog'));
+      await tester.pumpAndSettle();
+
+      // Verify custom date range dialog is presented with OK button and month title
+      expect(
+        find.byKey(const Key('custom_date_range_picker_confirm_button')),
+        findsOneWidget,
+      );
+      expect(find.text('OK'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('custom_date_range_picker_confirm_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(selectedRange, isNotNull);
+      expect(selectedRange?.start, equals(DateTime(2026, 6, 1)));
+      expect(selectedRange?.end, equals(DateTime(2026, 6, 15)));
+    });
+
     testWidgets('Backwards compatibility aliases work as expected',
         (WidgetTester tester) async {
       expect(CustomDatePicker, equals(DatePickr));

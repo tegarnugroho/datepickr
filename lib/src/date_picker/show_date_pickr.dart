@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../date_range_picker/date_pickr_date_range_dialog.dart';
+
 /// Shows a Material Date Picker dialog.
 ///
 /// Wraps Flutter's native [showDatePicker] while providing sensible defaults
@@ -66,6 +68,7 @@ Future<DateTimeRange?> showDatePickrRange({
   DateTime? lastDate,
   DateTimeRange? selectedDateTimeRange,
   Locale? locale,
+  String? subTitle,
   String? confirmText,
   String? cancelText,
   String? saveText,
@@ -75,12 +78,29 @@ Future<DateTimeRange?> showDatePickrRange({
   Color? primaryColor,
   ThemeData? theme,
   TransitionBuilder? builder,
+  bool fullScreen = true,
+  BoxConstraints? dialogConstraints,
 }) {
   final now = DateTime.now();
   final effectiveInitial = selectedDateTimeRange ?? initialDateRange;
   final effectiveFirst =
       firstDate ?? now.subtract(const Duration(days: 365 * 200));
   final effectiveLast = lastDate ?? now.add(const Duration(days: 365 * 200));
+
+  if (!fullScreen) {
+    return showDatePickrDateRangeDialog(
+      context: context,
+      initialDateRange: effectiveInitial,
+      firstDate: effectiveFirst,
+      lastDate: effectiveLast,
+      subTitle: subTitle,
+      confirmText: confirmText ?? saveText,
+      cancelText: cancelText,
+      locale: locale,
+      primaryColor: primaryColor,
+      theme: theme,
+    );
+  }
 
   return showDateRangePicker(
     context: context,

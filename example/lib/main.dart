@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime? _selectedYearNormal;
   DateTime? _selectedYearSlider;
   DateTimeRange? _selectedDateRange;
+  DateTimeRange? _selectedDateRangeFullscreen;
 
   static const _monthNames = [
     'January',
@@ -130,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 24.0),
 
-            // Grid of 6 Cards
+            // Grid of 7 Cards
             LayoutBuilder(
               builder: (context, constraints) {
                 final double maxWidth = constraints.maxWidth;
@@ -269,26 +270,56 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Card 6: Date Picker (With Range)
+                  // Card 6: Date Range Picker (Custom Dialog)
                   _buildCard(
                     width: cardWidth,
                     number: '6',
-                    title: 'Date Picker (With Range)',
-                    description: 'Select a start and end date.',
+                    title: 'Date Range Picker\n(Custom Dialog)',
+                    description:
+                        'Select a date range using a custom compact dialog.',
                     placeholder: 'Select date range',
-                    buttonLabel: 'Pick Date Range',
+                    buttonLabel: 'Pick Range (Dialog)',
                     selectedText: _formatDateRange(_selectedDateRange),
                     picker: DatePickr(
-                      key: const Key('example_date_range_picker'),
+                      key: const Key('example_date_range_picker_dialog'),
                       type: DatePickrType.dateRange,
+                      fullScreen: false,
                       initialDateRange: _selectedDateRange,
                       onRangeSelected: (range) {
                         setState(() => _selectedDateRange = range);
                       },
                       child: _buildCardInputs(
                         placeholder: 'Select date range',
-                        buttonLabel: 'Pick Date Range',
+                        buttonLabel: 'Pick Range (Dialog)',
                         selectedText: _formatDateRange(_selectedDateRange),
+                      ),
+                    ),
+                  ),
+
+                  // Card 7: Date Range Picker (Fullscreen Modal)
+                  _buildCard(
+                    width: cardWidth,
+                    number: '7',
+                    title: 'Date Range Picker\n(Fullscreen)',
+                    description:
+                        'Select a date range using the standard fullscreen modal.',
+                    placeholder: 'Select date range',
+                    buttonLabel: 'Pick Range (Fullscreen)',
+                    selectedText:
+                        _formatDateRange(_selectedDateRangeFullscreen),
+                    picker: DatePickr(
+                      key: const Key('example_date_range_picker_fullscreen'),
+                      type: DatePickrType.dateRange,
+                      fullScreen: true,
+                      initialDateRange: _selectedDateRangeFullscreen,
+                      onRangeSelected: (range) {
+                        setState(() => _selectedDateRangeFullscreen = range);
+                      },
+                      child: _buildCardInputs(
+                        placeholder: 'Select date range',
+                        buttonLabel: 'Pick Range (Fullscreen)',
+                        selectedText:
+                            _formatDateRange(_selectedDateRangeFullscreen),
                       ),
                     ),
                   ),
