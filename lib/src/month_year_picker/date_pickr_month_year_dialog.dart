@@ -240,6 +240,58 @@ class _DatePickrMonthYearDialogState
   }
 
   @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    final effective = widget.selectedDateTime ?? widget.initialDate;
+
+    _resolvedFirstDate =
+        widget.firstDate ?? DateTime(effective.year - 100, 1, 1);
+
+    final maxAllowed = widget.onlyCompletedYears
+        ? DateTime(now.year - 1, 12, 31)
+        : (effective.isAfter(now)
+            ? DateTime(effective.year, effective.month)
+            : now);
+
+    DateTime candidate = widget.lastDate ?? maxAllowed;
+    if (widget.onlyCompletedYears && candidate.isAfter(maxAllowed)) {
+      candidate = maxAllowed;
+    }
+    _resolvedLastDate =
+        candidate.isBefore(_resolvedFirstDate) ? _resolvedFirstDate : candidate;
+
+    _model = _MonthYearSelectionModel(
+      initialYear: effective.year,
+      initialMonth: effective.month,
+      firstDate: _resolvedFirstDate,
+      lastDate: _resolvedLastDate,
+    );
+    _model.clampSelection();
+
+    if (widget.style == DatePickrStyle.slider) {
+      _monthScrollController = FixedExtentScrollController(
+        initialItem: (_model.selectedMonth - 1).clamp(0, 11),
+      );
+      final maxIndex =
+          math.max<int>(0, _resolvedLastDate.year - _resolvedFirstDate.year);
+      final initialYearIndex =
+          (_model.selectedYear - _resolvedFirstDate.year).clamp(0, maxIndex);
+      _yearScrollController = FixedExtentScrollController(
+        initialItem: initialYearIndex.toInt(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _model.dispose();
+    _monthScrollController?.dispose();
+    _yearScrollController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = _dialogSize(context);
     final orientation = MediaQuery.orientationOf(context);
