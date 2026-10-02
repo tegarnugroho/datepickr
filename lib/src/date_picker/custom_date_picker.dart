@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../month_year_picker/custom_month_year_picker_dialog.dart';
 import '../year_picker/custom_year_picker_dialog.dart';
+import 'custom_date_picker_style.dart';
 import 'custom_date_picker_type.dart';
 import 'show_custom_date_picker.dart';
 
@@ -17,6 +18,7 @@ class CustomDatePicker extends StatelessWidget {
     this.firstDate,
     this.lastDate,
     this.type = CustomDatePickerType.date,
+    this.style = CustomDatePickerStyle.normal,
     this.subTitle,
     this.confirmText,
     this.cancelText,
@@ -45,6 +47,9 @@ class CustomDatePicker extends StatelessWidget {
 
   /// Type of picker to display.
   final CustomDatePickerType type;
+
+  /// Visual display style of the picker (normal or slider).
+  final CustomDatePickerStyle style;
 
   /// Header subtitle displayed in the dialog.
   final String? subTitle;
@@ -89,6 +94,7 @@ class CustomDatePicker extends StatelessWidget {
             firstDate: firstDate,
             lastDate: lastDate,
             selectedDateTime: selectedDateTime,
+            style: style,
             subTitle: subTitle,
             confirmText: confirmText,
             cancelText: cancelText,
@@ -104,6 +110,7 @@ class CustomDatePicker extends StatelessWidget {
             lastDate: lastDate,
             selectedDateTime: selectedDateTime,
             type: type,
+            style: style,
             subTitle: subTitle,
             confirmText: confirmText,
             cancelText: cancelText,

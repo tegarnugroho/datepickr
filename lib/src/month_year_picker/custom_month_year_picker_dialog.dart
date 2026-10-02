@@ -1,5 +1,9 @@
+import 'dart:math' as math;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../date_picker/custom_date_picker_style.dart';
 import '../date_picker/custom_date_picker_type.dart';
 import '../utils/custom_month_year_picker_utils.dart';
 
@@ -11,6 +15,7 @@ Future<DateTime?> showCustomMonthYearPicker({
   DateTime? lastDate,
   DateTime? selectedDateTime,
   CustomDatePickerType type = CustomDatePickerType.month,
+  CustomDatePickerStyle style = CustomDatePickerStyle.normal,
   String? subTitle,
   String? confirmText,
   String? cancelText,
@@ -28,6 +33,7 @@ Future<DateTime?> showCustomMonthYearPicker({
         lastDate: lastDate,
         selectedDateTime: selectedDateTime,
         type: type,
+        style: style,
         subTitle: subTitle,
         confirmText: confirmText,
         cancelText: cancelText,
@@ -48,6 +54,7 @@ class CustomMonthYearPickerDialog extends StatefulWidget {
     this.lastDate,
     this.selectedDateTime,
     this.type = CustomDatePickerType.month,
+    this.style = CustomDatePickerStyle.normal,
     this.subTitle,
     this.confirmText,
     this.cancelText,
@@ -61,6 +68,7 @@ class CustomMonthYearPickerDialog extends StatefulWidget {
   final DateTime? lastDate;
   final DateTime? selectedDateTime;
   final CustomDatePickerType type;
+  final CustomDatePickerStyle style;
   final String? subTitle;
   final String? confirmText;
   final String? cancelText;
@@ -80,6 +88,8 @@ class _CustomMonthYearPickerDialogState
   late DateTime _resolvedFirstDate;
   late DateTime _resolvedLastDate;
   bool _isYearSelecting = false;
+  FixedExtentScrollController? _monthScrollController;
+  FixedExtentScrollController? _yearScrollController;
 
   static const Size _portraitDialogSizeM2 = Size(330.0, 518.0);
   static const Size _portraitDialogSizeM3 = Size(360.0, 568.0);
@@ -99,6 +109,12 @@ class _CustomMonthYearPickerDialogState
   Size _dialogSize(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final Orientation orientation = MediaQuery.orientationOf(context);
+    if (widget.style == CustomDatePickerStyle.slider) {
+      return switch (orientation) {
+        Orientation.portrait => const Size(340.0, 380.0),
+        Orientation.landscape => _landscapeDialogSize,
+      };
+    }
     return switch (orientation) {
       Orientation.portrait =>
         useMaterial3 ? _portraitDialogSizeM3 : _portraitDialogSizeM2,
@@ -141,6 +157,26 @@ class _CustomMonthYearPickerDialogState
         candidate.isBefore(_resolvedFirstDate) ? _resolvedFirstDate : candidate;
 
     _clampSelection();
+
+    if (widget.style == CustomDatePickerStyle.slider) {
+      _monthScrollController = FixedExtentScrollController(
+        initialItem: (_selectedMonth - 1).clamp(0, 11),
+      );
+      final maxIndex =
+          math.max<int>(0, _resolvedLastDate.year - _resolvedFirstDate.year);
+      final initialYearIndex =
+          (_selectedYear - _resolvedFirstDate.year).clamp(0, maxIndex);
+      _yearScrollController = FixedExtentScrollController(
+        initialItem: initialYearIndex.toInt(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _monthScrollController?.dispose();
+    _yearScrollController?.dispose();
+    super.dispose();
   }
 
   void _clampSelection() {
@@ -226,8 +262,11 @@ class _CustomMonthYearPickerDialogState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child:
-                    _isYearSelecting ? _buildYearPicker() : _buildMonthPicker(),
+                child: widget.style == CustomDatePickerStyle.slider
+                    ? _buildMonthYearSlider()
+                    : (_isYearSelecting
+                        ? _buildYearPicker()
+                        : _buildMonthPicker()),
               ),
               _buildActions(),
             ],
@@ -243,7 +282,9 @@ class _CustomMonthYearPickerDialogState
       children: [
         _buildPortraitHeader(),
         Expanded(
-          child: _isYearSelecting ? _buildYearPicker() : _buildMonthPicker(),
+          child: widget.style == CustomDatePickerStyle.slider
+              ? _buildMonthYearSlider()
+              : (_isYearSelecting ? _buildYearPicker() : _buildMonthPicker()),
         ),
         _buildActions(),
       ],
@@ -495,6 +536,160 @@ class _CustomMonthYearPickerDialogState
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildMonthYearSlider() {
+    final primaryColor = _primary(context);
+    final textColor = _onSurface(context);
+    final subtitleColor = _textGrey(context);
+    final yearCount =
+        math.max(1, _resolvedLastDate.year - _resolvedFirstDate.year + 1);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          // Month Column (Left)
+          Expanded(
+            flex: 3,
+            child: CupertinoPicker.builder(
+              key: const Key('custom_month_year_slider_month_picker'),
+              scrollController: _monthScrollController,
+              itemExtent: 44.0,
+              squeeze: 1.25,
+              diameterRatio: 1.2,
+              selectionOverlay: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: primaryColor.withOpacity(0.25),
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              childCount: 12,
+              onSelectedItemChanged: (int index) {
+                final month = index + 1;
+                setState(() {
+                  _selectedMonth = month;
+                });
+              },
+              itemBuilder: (context, index) {
+                final month = index + 1;
+                final isSelected = month == _selectedMonth;
+                final isDisabled = _isMonthDisabled(month);
+                final monthName = _fullMonths.length >= month
+                    ? _fullMonths[month - 1]
+                    : '$month';
+
+                final itemTextColor = isDisabled
+                    ? subtitleColor.withOpacity(0.3)
+                    : (isSelected ? primaryColor : textColor.withOpacity(0.65));
+
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    _monthScrollController?.animateToItem(
+                      index,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  child: Center(
+                    child: Text(
+                      monthName,
+                      style: TextStyle(
+                        fontSize: isSelected ? 17.0 : 15.0,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: itemTextColor,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 1,
+            height: 120,
+            color: subtitleColor.withOpacity(0.15),
+          ),
+          const SizedBox(width: 8),
+          // Year Column (Right)
+          Expanded(
+            flex: 2,
+            child: CupertinoPicker.builder(
+              key: const Key('custom_month_year_slider_year_picker'),
+              scrollController: _yearScrollController,
+              itemExtent: 44.0,
+              squeeze: 1.25,
+              diameterRatio: 1.2,
+              selectionOverlay: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10.0),
+                  border: Border.all(
+                    color: primaryColor.withOpacity(0.25),
+                    width: 1.0,
+                  ),
+                ),
+              ),
+              childCount: yearCount,
+              onSelectedItemChanged: (int index) {
+                final year = _resolvedFirstDate.year + index;
+                setState(() {
+                  _selectedYear = year;
+                  if (_isMonthDisabled(_selectedMonth)) {
+                    _selectedMonth =
+                        CustomMonthYearPickerUtils.getTargetValidMonth(
+                      currentMonth: _selectedMonth,
+                      selectedYear: _selectedYear,
+                      firstDate: _resolvedFirstDate,
+                      lastDate: _resolvedLastDate,
+                    );
+                    if (_monthScrollController?.hasClients ?? false) {
+                      _monthScrollController?.jumpToItem(_selectedMonth - 1);
+                    }
+                  }
+                });
+              },
+              itemBuilder: (context, index) {
+                final year = _resolvedFirstDate.year + index;
+                final isSelected = year == _selectedYear;
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    _yearScrollController?.animateToItem(
+                      index,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  child: Center(
+                    child: Text(
+                      '$year',
+                      style: TextStyle(
+                        fontSize: isSelected ? 18.0 : 16.0,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? primaryColor
+                            : textColor.withOpacity(0.65),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 

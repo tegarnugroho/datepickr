@@ -2,6 +2,7 @@
 library;
 
 export 'src/date_picker/custom_date_picker.dart';
+export 'src/date_picker/custom_date_picker_style.dart';
 export 'src/date_picker/custom_date_picker_type.dart';
 export 'src/date_picker/show_custom_date_picker.dart';
 export 'src/month_year_picker/custom_month_year_picker_dialog.dart';

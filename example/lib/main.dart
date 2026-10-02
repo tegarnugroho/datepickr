@@ -63,13 +63,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 16),
           _buildCard(
-            title: '2. Month & Year Picker',
+            title: '2. Month & Year Picker (Normal Grid)',
             subtitle: _selectedMonthYear != null
                 ? 'Selected: ${_selectedMonthYear!.year}-${_selectedMonthYear!.month.toString().padLeft(2, '0')}'
                 : 'No month & year selected',
             picker: CustomDatePicker(
-              key: const Key('example_month_year_picker'),
+              key: const Key('example_month_year_picker_normal'),
               type: CustomDatePickerType.month,
+              style: CustomDatePickerStyle.normal,
               initialDate: _selectedMonthYear ?? DateTime.now(),
               onSelected: (date) {
                 setState(() => _selectedMonthYear = date);
@@ -77,19 +78,41 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ElevatedButton.icon(
                 onPressed: null,
                 icon: const Icon(Icons.calendar_month),
-                label: const Text('Pick Month & Year'),
+                label: const Text('Pick Month & Year (Normal)'),
               ),
             ),
           ),
           const SizedBox(height: 16),
           _buildCard(
-            title: '3. Year Picker (Completed Years Only)',
+            title: '3. Month & Year Picker (Slider Columns)',
+            subtitle: _selectedMonthYear != null
+                ? 'Selected: ${_selectedMonthYear!.year}-${_selectedMonthYear!.month.toString().padLeft(2, '0')}'
+                : 'No month & year selected',
+            picker: CustomDatePicker(
+              key: const Key('example_month_year_picker_slider'),
+              type: CustomDatePickerType.month,
+              style: CustomDatePickerStyle.slider,
+              initialDate: _selectedMonthYear ?? DateTime.now(),
+              onSelected: (date) {
+                setState(() => _selectedMonthYear = date);
+              },
+              child: ElevatedButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.view_column_outlined),
+                label: const Text('Pick Month & Year (Slider)'),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildCard(
+            title: '4. Year Picker (Normal Grid)',
             subtitle: _selectedYear != null
                 ? 'Selected: ${_selectedYear!.year}'
                 : 'No year selected',
             picker: CustomDatePicker(
-              key: const Key('example_year_picker'),
+              key: const Key('example_year_picker_normal'),
               type: CustomDatePickerType.year,
+              style: CustomDatePickerStyle.normal,
               onlyCompletedYears: true,
               initialDate: _selectedYear ?? DateTime.now(),
               onSelected: (date) {
@@ -98,7 +121,29 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ElevatedButton.icon(
                 onPressed: null,
                 icon: const Icon(Icons.date_range),
-                label: const Text('Pick Completed Year'),
+                label: const Text('Pick Completed Year (Normal)'),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildCard(
+            title: '5. Year Picker (Slider Column)',
+            subtitle: _selectedYear != null
+                ? 'Selected: ${_selectedYear!.year}'
+                : 'No year selected',
+            picker: CustomDatePicker(
+              key: const Key('example_year_picker_slider'),
+              type: CustomDatePickerType.year,
+              style: CustomDatePickerStyle.slider,
+              onlyCompletedYears: true,
+              initialDate: _selectedYear ?? DateTime.now(),
+              onSelected: (date) {
+                setState(() => _selectedYear = date);
+              },
+              child: ElevatedButton.icon(
+                onPressed: null,
+                icon: const Icon(Icons.unfold_more),
+                label: const Text('Pick Completed Year (Slider)'),
               ),
             ),
           ),
@@ -131,24 +176,52 @@ class _HomeScreenState extends State<HomeScreen> {
                   final result = await showCustomMonthYearPicker(
                     context: context,
                     initialDate: DateTime.now(),
+                    style: CustomDatePickerStyle.normal,
                   );
                   if (result != null) {
                     setState(() => _selectedMonthYear = result);
                   }
                 },
-                child: const Text('showCustomMonthYearPicker()'),
+                child: const Text('showCustomMonthYearPicker (normal)'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  final result = await showCustomMonthYearPicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    style: CustomDatePickerStyle.slider,
+                  );
+                  if (result != null) {
+                    setState(() => _selectedMonthYear = result);
+                  }
+                },
+                child: const Text('showCustomMonthYearPicker (slider)'),
               ),
               OutlinedButton(
                 onPressed: () async {
                   final result = await showCustomYearPicker(
                     context: context,
                     initialDate: DateTime.now(),
+                    style: CustomDatePickerStyle.normal,
                   );
                   if (result != null) {
                     setState(() => _selectedYear = result);
                   }
                 },
-                child: const Text('showCustomYearPicker()'),
+                child: const Text('showCustomYearPicker (normal)'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  final result = await showCustomYearPicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    style: CustomDatePickerStyle.slider,
+                  );
+                  if (result != null) {
+                    setState(() => _selectedYear = result);
+                  }
+                },
+                child: const Text('showCustomYearPicker (slider)'),
               ),
             ],
           ),

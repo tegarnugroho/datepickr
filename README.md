@@ -113,6 +113,30 @@ final result = await showCustomDatePicker(
 
 ---
 
+### 3. Normal vs Slider Style
+
+Both Month-Year and Year pickers support two display styles via `CustomDatePickerStyle`:
+- `CustomDatePickerStyle.normal`: Default grid-based view.
+- `CustomDatePickerStyle.slider`: Vertical wheel scroll view (Month and Year side-by-side columns for month picker, or single column for year picker).
+
+```dart
+// Using widget wrapper
+CustomDatePicker(
+  type: CustomDatePickerType.month,
+  style: CustomDatePickerStyle.slider, // or CustomDatePickerStyle.normal
+  onSelected: (date) => print(date),
+  child: const Text('Pick Month & Year'),
+)
+
+// Using dialog function
+final result = await showCustomMonthYearPicker(
+  context: context,
+  style: CustomDatePickerStyle.slider,
+);
+```
+
+---
+
 ## Customization
 
 The pickers inherit the colors and shapes of your application's `ThemeData`:

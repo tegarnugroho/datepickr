@@ -313,5 +313,129 @@ void main() {
 
       expect(result, equals(DateTime(2026, 3, 1)));
     });
+
+    testWidgets(
+        'CustomDatePicker with month type and slider style renders month & year columns and selects date',
+        (WidgetTester tester) async {
+      DateTime? result;
+      final initialDate = DateTime(2026, 5, 1);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomDatePicker(
+              key: const Key('month_slider_picker'),
+              type: CustomDatePickerType.month,
+              style: CustomDatePickerStyle.slider,
+              initialDate: initialDate,
+              firstDate: DateTime(2020, 1, 1),
+              lastDate: DateTime(2030, 12, 31),
+              child: const Text('Pick a month slider'),
+              onSelected: (DateTime dateTime) {
+                result = dateTime;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pick a month slider'));
+      await tester.pumpAndSettle();
+
+      // Verify the slider pickers exist
+      expect(
+        find.byKey(const Key('custom_month_year_slider_month_picker')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('custom_month_year_slider_year_picker')),
+        findsOneWidget,
+      );
+
+      // Verify dialog header displays May 2026
+      expect(find.text('May 2026'), findsOneWidget);
+
+      // Tap OK
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      expect(result, equals(DateTime(2026, 5, 1)));
+    });
+
+    testWidgets(
+        'CustomDatePicker with month type and slider style cancels when Cancel tapped',
+        (WidgetTester tester) async {
+      DateTime? result;
+      final initialDate = DateTime(2026, 5, 1);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomDatePicker(
+              key: const Key('month_slider_cancel'),
+              type: CustomDatePickerType.month,
+              style: CustomDatePickerStyle.slider,
+              initialDate: initialDate,
+              child: const Text('Pick a month slider'),
+              onSelected: (DateTime dateTime) {
+                result = dateTime;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pick a month slider'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(result, isNull);
+    });
+
+    testWidgets(
+        'CustomDatePicker with year type and slider style renders year slider and selects year',
+        (WidgetTester tester) async {
+      DateTime? result;
+      final initialDate = DateTime(2025, 1, 1);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomDatePicker(
+              key: const Key('year_slider_picker'),
+              type: CustomDatePickerType.year,
+              style: CustomDatePickerStyle.slider,
+              initialDate: initialDate,
+              child: const Text('Pick a year slider'),
+              onSelected: (DateTime dateTime) {
+                result = dateTime;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pick a year slider'));
+      await tester.pumpAndSettle();
+
+      // Verify year slider picker exists
+      expect(
+        find.byKey(const Key('custom_year_slider_picker')),
+        findsOneWidget,
+      );
+
+      // Verify year 2025 in header
+      expect(find.text('2025'), findsAtLeast(1));
+
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      expect(result, equals(DateTime(2025, 1, 1)));
+    });
   });
 }

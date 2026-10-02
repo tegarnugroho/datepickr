@@ -1,4 +1,9 @@
+import 'dart:math' as math;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../date_picker/custom_date_picker_style.dart';
 
 /// Shows a dialog for picking a year.
 Future<DateTime?> showCustomYearPicker({
@@ -7,6 +12,7 @@ Future<DateTime?> showCustomYearPicker({
   DateTime? firstDate,
   DateTime? lastDate,
   DateTime? selectedDateTime,
+  CustomDatePickerStyle style = CustomDatePickerStyle.normal,
   String? subTitle,
   String? confirmText,
   String? cancelText,
@@ -23,6 +29,7 @@ Future<DateTime?> showCustomYearPicker({
         firstDate: firstDate,
         lastDate: lastDate,
         selectedDateTime: selectedDateTime,
+        style: style,
         subTitle: subTitle,
         confirmText: confirmText,
         cancelText: cancelText,
@@ -42,6 +49,7 @@ class CustomYearPickerDialog extends StatefulWidget {
     this.firstDate,
     this.lastDate,
     this.selectedDateTime,
+    this.style = CustomDatePickerStyle.normal,
     this.subTitle,
     this.confirmText,
     this.cancelText,
@@ -54,6 +62,7 @@ class CustomYearPickerDialog extends StatefulWidget {
   final DateTime? firstDate;
   final DateTime? lastDate;
   final DateTime? selectedDateTime;
+  final CustomDatePickerStyle style;
   final String? subTitle;
   final String? confirmText;
   final String? cancelText;
@@ -69,6 +78,7 @@ class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
   late DateTime _selectedDate;
   late DateTime _resolvedFirstDate;
   late DateTime _resolvedLastDate;
+  FixedExtentScrollController? _yearScrollController;
 
   static const Size _portraitDialogSizeM2 = Size(330.0, 518.0);
   static const Size _portraitDialogSizeM3 = Size(360.0, 568.0);
@@ -88,6 +98,12 @@ class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
   Size _dialogSize(BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final Orientation orientation = MediaQuery.orientationOf(context);
+    if (widget.style == CustomDatePickerStyle.slider) {
+      return switch (orientation) {
+        Orientation.portrait => const Size(340.0, 380.0),
+        Orientation.landscape => _landscapeDialogSize,
+      };
+    }
     return switch (orientation) {
       Orientation.portrait =>
         useMaterial3 ? _portraitDialogSizeM3 : _portraitDialogSizeM2,
@@ -131,6 +147,22 @@ class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
       initial = _resolvedLastDate;
     }
     _selectedDate = initial;
+
+    if (widget.style == CustomDatePickerStyle.slider) {
+      final maxIndex =
+          math.max<int>(0, _resolvedLastDate.year - _resolvedFirstDate.year);
+      final initialYearIndex =
+          (_selectedDate.year - _resolvedFirstDate.year).clamp(0, maxIndex);
+      _yearScrollController = FixedExtentScrollController(
+        initialItem: initialYearIndex.toInt(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _yearScrollController?.dispose();
+    super.dispose();
   }
 
   @override
@@ -175,7 +207,11 @@ class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: _buildYearPicker()),
+              Expanded(
+                child: widget.style == CustomDatePickerStyle.slider
+                    ? _buildYearSlider()
+                    : _buildYearPicker(),
+              ),
               _buildActions(),
             ],
           ),
@@ -189,7 +225,11 @@ class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildPortraitHeader(),
-        Expanded(child: _buildYearPicker()),
+        Expanded(
+          child: widget.style == CustomDatePickerStyle.slider
+              ? _buildYearSlider()
+              : _buildYearPicker(),
+        ),
         _buildActions(),
       ],
     );
@@ -318,6 +358,64 @@ class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
           });
         },
       ),
+    );
+  }
+
+  Widget _buildYearSlider() {
+    final primaryColor = _primary(context);
+    final textColor = _onSurface(context);
+    final yearCount =
+        math.max(1, _resolvedLastDate.year - _resolvedFirstDate.year + 1);
+
+    return CupertinoPicker.builder(
+      key: const Key('custom_year_slider_picker'),
+      scrollController: _yearScrollController,
+      itemExtent: 44.0,
+      squeeze: 1.25,
+      diameterRatio: 1.2,
+      selectionOverlay: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 24.0),
+        decoration: BoxDecoration(
+          color: primaryColor.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(
+            color: primaryColor.withOpacity(0.25),
+            width: 1.0,
+          ),
+        ),
+      ),
+      childCount: yearCount,
+      onSelectedItemChanged: (int index) {
+        final year = _resolvedFirstDate.year + index;
+        setState(() {
+          _selectedDate =
+              DateTime(year, _selectedDate.month, _selectedDate.day);
+        });
+      },
+      itemBuilder: (context, index) {
+        final year = _resolvedFirstDate.year + index;
+        final isSelected = year == _selectedDate.year;
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            _yearScrollController?.animateToItem(
+              index,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+            );
+          },
+          child: Center(
+            child: Text(
+              '$year',
+              style: TextStyle(
+                fontSize: isSelected ? 19.0 : 16.0,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? primaryColor : textColor.withOpacity(0.65),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
