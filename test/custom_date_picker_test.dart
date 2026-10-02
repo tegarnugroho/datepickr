@@ -437,5 +437,50 @@ void main() {
 
       expect(result, equals(DateTime(2025, 1, 1)));
     });
+
+    testWidgets(
+        'CustomYearPickerDialog preserves scroll offset when changing selected years',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    showCustomYearPicker(
+                      context: context,
+                      initialDate: DateTime(2024, 1, 1),
+                      firstDate: DateTime(1950, 1, 1),
+                      lastDate: DateTime(2030, 12, 31),
+                    );
+                  },
+                  child: const Text('Open Year Picker'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Year Picker'));
+      await tester.pumpAndSettle();
+
+      // Find the scrollable GridView
+      final scrollableFinder = find.byType(Scrollable);
+      expect(scrollableFinder, findsOneWidget);
+
+      final scrollableState = tester.state<ScrollableState>(scrollableFinder);
+      final initialOffset = scrollableState.position.pixels;
+
+      // Tap another visible year (e.g. 2023 or 2022)
+      if (find.text('2023').evaluate().isNotEmpty) {
+        await tester.tap(find.text('2023'));
+        await tester.pumpAndSettle();
+
+        // Offset should not have jumped to a different position
+        expect(scrollableState.position.pixels, equals(initialOffset));
+      }
+    });
   });
 }

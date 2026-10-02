@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../date_picker/custom_date_picker_style.dart';
+import 'custom_year_grid_picker.dart';
 
 /// Shows a dialog for picking a year.
 Future<DateTime?> showCustomYearPicker({
@@ -329,35 +330,16 @@ class _CustomYearPickerDialogState extends State<CustomYearPickerDialog> {
   }
 
   Widget _buildYearPicker() {
-    final primaryColor = _primary(context);
-    final surfaceColor = _surface(context);
-    final textColor = _onSurface(context);
-
-    return Theme(
-      data: ThemeData.light().copyWith(
-        dividerColor: Colors.transparent,
-        dividerTheme: const DividerThemeData(
-          color: Colors.transparent,
-          space: 0,
-          thickness: 0,
-        ),
-        colorScheme: ColorScheme.light(
-          primary: primaryColor,
-          onPrimary: Colors.white,
-          surface: surfaceColor,
-          onSurface: textColor,
-        ),
-      ),
-      child: YearPicker(
-        firstDate: _resolvedFirstDate,
-        lastDate: _resolvedLastDate,
-        selectedDate: _selectedDate,
-        onChanged: (DateTime dateTime) {
-          setState(() {
-            _selectedDate = dateTime;
-          });
-        },
-      ),
+    return CustomYearGridPicker(
+      firstDate: _resolvedFirstDate,
+      lastDate: _resolvedLastDate,
+      selectedDate: _selectedDate,
+      primaryColor: _primary(context),
+      onChanged: (DateTime dateTime) {
+        setState(() {
+          _selectedDate = dateTime;
+        });
+      },
     );
   }
 
