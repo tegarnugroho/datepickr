@@ -12,14 +12,14 @@ Designed with clean dialog layouts, smooth wheel-slider controls, adaptive Mater
 
 | Date Range (Custom Dialog) | Month & Year (Slider Wheel) | Month & Year (Normal Grid) |
 | :---: | :---: | :---: |
-| <img src="doc/screenshots/date_range_dialog.png" width="240" alt="Date Range Dialog"/> | <img src="doc/screenshots/month_year_slider.png" width="240" alt="Month Year Slider"/> | <img src="doc/screenshots/month_year_grid.png" width="240" alt="Month Year Grid"/> |
+| <img src="https://raw.githubusercontent.com/tegarnugroho/datepickr/main/doc/screenshots/date_range_dialog.png" width="240" alt="Date Range Dialog"/> | <img src="https://raw.githubusercontent.com/tegarnugroho/datepickr/main/doc/screenshots/month_year_slider.png" width="240" alt="Month Year Slider"/> | <img src="https://raw.githubusercontent.com/tegarnugroho/datepickr/main/doc/screenshots/month_year_grid.png" width="240" alt="Month Year Grid"/> |
 | Compact dialog with continuous range ribbon | Dual wheel sliders for quick scrolling | Classic responsive month & year grid |
 
 ### Year Pickers & Fullscreen Range
 
 | Year Picker (Slider Wheel) | Year Picker (Normal Grid) | Date Range (Fullscreen) |
 | :---: | :---: | :---: |
-| <img src="doc/screenshots/year_slider.png" width="240" alt="Year Slider"/> | <img src="doc/screenshots/year_grid.png" width="240" alt="Year Grid"/> | <img src="doc/screenshots/date_range_fullscreen.png" width="240" alt="Date Range Fullscreen"/> |
+| <img src="https://raw.githubusercontent.com/tegarnugroho/datepickr/main/doc/screenshots/year_slider.png" width="240" alt="Year Slider"/> | <img src="https://raw.githubusercontent.com/tegarnugroho/datepickr/main/doc/screenshots/year_grid.png" width="240" alt="Year Grid"/> | <img src="https://raw.githubusercontent.com/tegarnugroho/datepickr/main/doc/screenshots/date_range_fullscreen.png" width="240" alt="Date Range Fullscreen"/> |
 | Single wheel year selector | Grid view with quick jump & constraints | Standard fullscreen Material range sheet |
 
 ---

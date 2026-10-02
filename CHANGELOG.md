@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.2
+
+* Fix screenshot image URLs in README for pub.dev rendering.
+
 ## 0.0.1
 
 * Initial release of `datepickr`.
