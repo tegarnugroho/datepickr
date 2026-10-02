@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 6.0),
             const Text(
-              'Date Picker Examples',
+              'DatePickr Examples',
               style: TextStyle(
                 color: Color(0xFFF8FAFC),
                 fontSize: 26.0,
