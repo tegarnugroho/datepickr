@@ -1,4 +1,4 @@
-import 'package:flutter_date_picker/flutter_date_picker.dart';
+import 'package:datepickr/datepickr.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

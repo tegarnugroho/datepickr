@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_date_picker/flutter_date_picker.dart';
+import 'package:datepickr/datepickr.dart';
 
 void main() {
   runApp(const ExampleApp());

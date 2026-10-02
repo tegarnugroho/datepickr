@@ -1,5 +1,5 @@
 name: example
-description: Demonstrates how to use the flutter_date_picker package.
+description: Demonstrates how to use the datepickr package.
 publish_to: "none"
 version: 1.0.0+1
 
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_date_picker:
+  datepickr:
     path: ../
   intl: ">=0.19.0 <0.21.0"
 

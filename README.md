@@ -1,6 +1,6 @@
-# flutter_date_picker
+# datepickr
 
-A clean, customizable, and standalone Flutter package for selecting **Date**, **Month & Year**, and **Year**.
+A clean, customizable, and standalone Flutter package for selecting **Date**, **Date Range**, **Month & Year**, and **Year**.
 
 Designed with responsive dialog layouts for both Material 2 and Material 3, supporting portrait and landscape orientations, customizable themes, boundary constraints, and localization.
 
@@ -25,15 +25,15 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_date_picker:
+  datepickr:
     # Path or git reference
-    path: ../flutter_date_picker
+    path: ../datepickr
 ```
 
 Import in your Dart code:
 
 ```dart
-import 'package:flutter_date_picker/flutter_date_picker.dart';
+import 'package:datepickr/datepickr.dart';
 ```
 
 ---
