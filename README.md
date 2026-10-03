@@ -46,7 +46,7 @@ Add `datepickr` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  datepickr: ^0.0.1
+  datepickr: ^0.0.3
 ```
 
 Import the package in your Dart code:
