@@ -20,7 +20,7 @@ Future<DateTime?> showDatePickrMonthYear({
   String? confirmText,
   String? cancelText,
   Locale? locale,
-  bool onlyCompletedYears = false,
+  bool onlyCompleted = false,
   Color? primaryColor,
 }) {
   return showDialog<DateTime>(
@@ -38,7 +38,7 @@ Future<DateTime?> showDatePickrMonthYear({
         confirmText: confirmText,
         cancelText: cancelText,
         locale: locale,
-        onlyCompletedYears: onlyCompletedYears,
+        onlyCompleted: onlyCompleted,
         primaryColor: primaryColor,
       );
     },
@@ -62,7 +62,7 @@ class DatePickrMonthYearDialog extends StatefulWidget {
     this.confirmText,
     this.cancelText,
     this.locale,
-    this.onlyCompletedYears = false,
+    this.onlyCompleted = false,
     this.primaryColor,
   });
 
@@ -76,7 +76,7 @@ class DatePickrMonthYearDialog extends StatefulWidget {
   final String? confirmText;
   final String? cancelText;
   final Locale? locale;
-  final bool onlyCompletedYears;
+  final bool onlyCompleted;
   final Color? primaryColor;
 
   @override
@@ -93,11 +93,13 @@ class _MonthYearSelectionModel extends ChangeNotifier {
     required int initialMonth,
     required this.firstDate,
     required this.lastDate,
+    this.onlyCompleted = false,
   })  : _selectedYear = initialYear,
         _selectedMonth = initialMonth;
 
   final DateTime firstDate;
   final DateTime lastDate;
+  final bool onlyCompleted;
 
   int _selectedYear;
   int _selectedMonth;
@@ -115,6 +117,7 @@ class _MonthYearSelectionModel extends ChangeNotifier {
         selectedYear: _selectedYear,
         firstDate: firstDate,
         lastDate: lastDate,
+        onlyCompleted: onlyCompleted,
       );
 
   void selectMonth(int month) {
@@ -179,6 +182,7 @@ class _MonthYearSelectionModel extends ChangeNotifier {
         selectedYear: _selectedYear,
         firstDate: firstDate,
         lastDate: lastDate,
+        onlyCompleted: onlyCompleted,
       );
     }
   }
@@ -248,14 +252,14 @@ class _DatePickrMonthYearDialogState
     _resolvedFirstDate =
         widget.firstDate ?? DateTime(effective.year - 100, 1, 1);
 
-    final maxAllowed = widget.onlyCompletedYears
-        ? DateTime(now.year - 1, 12, 31)
+    final maxAllowed = widget.onlyCompleted
+        ? DateTime(now.year, now.month, 0)
         : (effective.isAfter(now)
             ? DateTime(effective.year, effective.month)
             : now);
 
     DateTime candidate = widget.lastDate ?? maxAllowed;
-    if (widget.onlyCompletedYears && candidate.isAfter(maxAllowed)) {
+    if (widget.onlyCompleted && candidate.isAfter(maxAllowed)) {
       candidate = maxAllowed;
     }
     _resolvedLastDate =
@@ -266,6 +270,7 @@ class _DatePickrMonthYearDialogState
       initialMonth: effective.month,
       firstDate: _resolvedFirstDate,
       lastDate: _resolvedLastDate,
+      onlyCompleted: widget.onlyCompleted,
     );
     _model.clampSelection();
 

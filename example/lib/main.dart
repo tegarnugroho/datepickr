@@ -52,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime? _selectedDate;
   DateTime? _selectedMonthYearNormal;
   DateTime? _selectedMonthYearSlider;
+  DateTime? _selectedMonthYearCompleted;
   DateTime? _selectedYearNormal;
   DateTime? _selectedYearSlider;
   DateTimeRange? _selectedDateRange;
@@ -218,10 +219,39 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Card 4: Year Picker (Normal Grid)
+                  // Card 4: Month & Year Picker (Completed Months Only)
                   _buildCard(
                     width: cardWidth,
                     number: '4',
+                    title: 'Month & Year Picker\n(Completed Months Only)',
+                    description:
+                        'Select month and year restricting to concluded past months.',
+                    placeholder: 'Select month & year',
+                    buttonLabel: 'Pick Completed Month',
+                    selectedText:
+                        _formatMonthYear(_selectedMonthYearCompleted),
+                    picker: DatePickr(
+                      key: const Key('example_month_year_completed_only'),
+                      type: DatePickrType.month,
+                      style: DatePickrStyle.normal,
+                      onlyCompleted: true,
+                      initialDate: _selectedMonthYearCompleted ?? DateTime.now(),
+                      onSelected: (date) {
+                        setState(() => _selectedMonthYearCompleted = date);
+                      },
+                      child: _buildCardInputs(
+                        placeholder: 'Select month & year',
+                        buttonLabel: 'Pick Completed Month',
+                        selectedText:
+                            _formatMonthYear(_selectedMonthYearCompleted),
+                      ),
+                    ),
+                  ),
+
+                  // Card 5: Year Picker (Normal Grid)
+                  _buildCard(
+                    width: cardWidth,
+                    number: '5',
                     title: 'Year Picker (Normal Grid)',
                     description: 'Select a year using a grid layout.',
                     placeholder: 'Select year',
@@ -231,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       key: const Key('example_year_picker_normal'),
                       type: DatePickrType.year,
                       style: DatePickrStyle.normal,
-                      onlyCompletedYears: true,
+                      onlyCompleted: true,
                       initialDate: _selectedYearNormal ?? DateTime.now(),
                       onSelected: (date) {
                         setState(() => _selectedYearNormal = date);
@@ -244,10 +274,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Card 5: Year Picker (Slider Column)
+                  // Card 6: Year Picker (Slider Column)
                   _buildCard(
                     width: cardWidth,
-                    number: '5',
+                    number: '6',
                     title: 'Year Picker (Slider Column)',
                     description: 'Select a year using a slider column.',
                     placeholder: 'Select year',
@@ -257,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       key: const Key('example_year_picker_slider'),
                       type: DatePickrType.year,
                       style: DatePickrStyle.slider,
-                      onlyCompletedYears: true,
+                      onlyCompleted: true,
                       initialDate: _selectedYearSlider ?? DateTime.now(),
                       onSelected: (date) {
                         setState(() => _selectedYearSlider = date);
@@ -270,10 +300,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Card 6: Date Range Picker (Custom Dialog)
+                  // Card 7: Date Range Picker (Custom Dialog)
                   _buildCard(
                     width: cardWidth,
-                    number: '6',
+                    number: '7',
                     title: 'Date Range Picker\n(Custom Dialog)',
                     description:
                         'Select a date range using a custom compact dialog.',
@@ -296,10 +326,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Card 7: Date Range Picker (Fullscreen Modal)
+                  // Card 8: Date Range Picker (Fullscreen Modal)
                   _buildCard(
                     width: cardWidth,
-                    number: '7',
+                    number: '8',
                     title: 'Date Range Picker\n(Fullscreen)',
                     description:
                         'Select a date range using the standard fullscreen modal.',

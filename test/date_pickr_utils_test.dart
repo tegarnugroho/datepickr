@@ -51,16 +51,67 @@ void main() {
         ),
         isTrue,
       );
+
+      final now = DateTime.now();
+      // Current month is disabled when onlyCompleted is true
+      expect(
+        DatePickrUtils.isMonthDisabled(
+          month: now.month,
+          selectedYear: now.year,
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2030),
+          onlyCompleted: true,
+        ),
+        isTrue,
+      );
+
+      // Past month in current year is enabled when onlyCompleted is true
+      if (now.month > 1) {
+        expect(
+          DatePickrUtils.isMonthDisabled(
+            month: now.month - 1,
+            selectedYear: now.year,
+            firstDate: DateTime(2020),
+            lastDate: DateTime(2030),
+            onlyCompleted: true,
+          ),
+          isFalse,
+        );
+      }
+
+      // Past year months are enabled when onlyCompleted is true
+      expect(
+        DatePickrUtils.isMonthDisabled(
+          month: 12,
+          selectedYear: now.year - 1,
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2030),
+          onlyCompleted: true,
+        ),
+        isFalse,
+      );
+
+      // Future year months are disabled when onlyCompleted is true
+      expect(
+        DatePickrUtils.isMonthDisabled(
+          month: 1,
+          selectedYear: now.year + 1,
+          firstDate: DateTime(2020),
+          lastDate: DateTime(2030),
+          onlyCompleted: true,
+        ),
+        isTrue,
+      );
     });
 
     test(
-        'isYearDisabled honors explicit bounds by default and restricts when onlyCompletedYears is true',
+        'isYearDisabled honors explicit bounds by default and restricts when onlyCompleted is true',
         () {
       final now = DateTime.now();
       final firstDate = DateTime(2020, 1, 1);
       final lastDate = DateTime(now.year, 12, 31);
 
-      // By default (onlyCompletedYears: false), explicitLastDate permitting now.year is honored
+      // By default (onlyCompleted: false), explicitLastDate permitting now.year is honored
       expect(
         DatePickrUtils.isYearDisabled(
           year: now.year,
@@ -68,12 +119,12 @@ void main() {
           firstDate: firstDate,
           lastDate: lastDate,
           explicitLastDate: now,
-          onlyCompletedYears: false,
+          onlyCompleted: false,
         ),
         isFalse,
       );
 
-      // When onlyCompletedYears: true, current unfinished year is disabled even with explicitLastDate
+      // When onlyCompleted: true, current unfinished year is disabled even with explicitLastDate
       expect(
         DatePickrUtils.isYearDisabled(
           year: now.year,
@@ -81,12 +132,12 @@ void main() {
           firstDate: firstDate,
           lastDate: lastDate,
           explicitLastDate: now,
-          onlyCompletedYears: true,
+          onlyCompleted: true,
         ),
         isTrue,
       );
 
-      // In year picker mode with onlyCompletedYears: true, past completed year is enabled
+      // In year picker mode with onlyCompleted: true, past completed year is enabled
       expect(
         DatePickrUtils.isYearDisabled(
           year: now.year - 1,
@@ -94,36 +145,36 @@ void main() {
           firstDate: firstDate,
           lastDate: lastDate,
           explicitLastDate: now,
-          onlyCompletedYears: true,
+          onlyCompleted: true,
         ),
         isFalse,
       );
     });
 
-    test('getTargetValidYear respects onlyCompletedYears', () {
+    test('getTargetValidYear respects onlyCompleted', () {
       final now = DateTime.now();
       final firstDate = DateTime(2020, 1, 1);
       final lastDate = DateTime(now.year, 12, 31);
 
-      // Default (onlyCompletedYears: false) allows now.year when in bounds
+      // Default (onlyCompleted: false) allows now.year when in bounds
       final defaultTarget = DatePickrUtils.getTargetValidYear(
         currentYear: now.year,
         type: DatePickrType.year,
         firstDate: firstDate,
         lastDate: lastDate,
         explicitLastDate: now,
-        onlyCompletedYears: false,
+        onlyCompleted: false,
       );
       expect(defaultTarget, now.year);
 
-      // With onlyCompletedYears: true, clamps to now.year - 1
+      // With onlyCompleted: true, clamps to now.year - 1
       final completedOnlyTarget = DatePickrUtils.getTargetValidYear(
         currentYear: now.year,
         type: DatePickrType.year,
         firstDate: firstDate,
         lastDate: lastDate,
         explicitLastDate: now,
-        onlyCompletedYears: true,
+        onlyCompleted: true,
       );
       expect(completedOnlyTarget, now.year - 1);
     });

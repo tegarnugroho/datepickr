@@ -18,7 +18,7 @@ Future<DateTime?> showDatePickrYear({
   String? confirmText,
   String? cancelText,
   Locale? locale,
-  bool onlyCompletedYears = false,
+  bool onlyCompleted = false,
   Color? primaryColor,
 }) {
   return showDialog<DateTime>(
@@ -35,7 +35,7 @@ Future<DateTime?> showDatePickrYear({
         confirmText: confirmText,
         cancelText: cancelText,
         locale: locale,
-        onlyCompletedYears: onlyCompletedYears,
+        onlyCompleted: onlyCompleted,
         primaryColor: primaryColor,
       );
     },
@@ -58,7 +58,7 @@ class DatePickrYearDialog extends StatefulWidget {
     this.confirmText,
     this.cancelText,
     this.locale,
-    this.onlyCompletedYears = false,
+    this.onlyCompleted = false,
     this.primaryColor,
   });
 
@@ -71,7 +71,7 @@ class DatePickrYearDialog extends StatefulWidget {
   final String? confirmText;
   final String? cancelText;
   final Locale? locale;
-  final bool onlyCompletedYears;
+  final bool onlyCompleted;
   final Color? primaryColor;
 
   @override
@@ -127,14 +127,14 @@ class _DatePickrYearDialogState extends State<DatePickrYearDialog> {
     _resolvedFirstDate =
         widget.firstDate ?? DateTime(effectiveSelected.year - 100, 1, 1);
 
-    final DateTime defaultLastDate = widget.onlyCompletedYears
+    final DateTime defaultLastDate = widget.onlyCompleted
         ? DateTime(now.year - 1, 12, 31)
         : (effectiveSelected.year > now.year
             ? DateTime(effectiveSelected.year, 12, 31)
             : DateTime(now.year, 12, 31));
 
     DateTime targetLastDate = widget.lastDate ?? defaultLastDate;
-    if (widget.onlyCompletedYears) {
+    if (widget.onlyCompleted) {
       final completedYearEnd = DateTime(now.year - 1, 12, 31);
       if (targetLastDate.isAfter(completedYearEnd)) {
         targetLastDate = completedYearEnd;

@@ -30,8 +30,8 @@ Designed with clean dialog layouts, smooth wheel-slider controls, adaptive Mater
 - **Date Range Picker**:
   - **Custom Compact Dialog** (`fullScreen: false`): Compact centered dialog with continuous highlight ribbons and start/end badge indicators.
   - **Standard Fullscreen Modal** (`fullScreen: true`): Material calendar sheet for long scrolling date selections.
-- **Month & Year Picker**: Dual-mode selector returning `DateTime(year, month, 1)`. Choose between **Normal Grid** or **Slider Columns** wheel scrolling.
-- **Year Picker**: Select a year returning `DateTime(year, 1, 1)`. Supports restricting selection to completed past years (`onlyCompletedYears: true`) in both Grid and Slider styles.
+- **Month & Year Picker**: Dual-mode selector returning `DateTime(year, month, 1)`. Choose between **Normal Grid** or **Slider Columns** wheel scrolling, with support for restricting selection to completed past months (`onlyCompleted: true`).
+- **Year Picker**: Select a year returning `DateTime(year, 1, 1)`. Supports restricting selection to completed past years (`onlyCompleted: true`) in both Grid and Slider styles.
 - **Responsive Layouts**: Seamlessly adapts to portrait and landscape orientations across mobile and tablet screens.
 - **Theme-Agnostic**: Fully integrates with your app's `ThemeData` and `ColorScheme` without hardcoded colors.
 - **Localization**: Full locale and internationalization (`intl`) support for month names and symbols.
@@ -83,10 +83,11 @@ final DateTimeRange? range = await showDatePickrRange(
 #### Month & Year Picker
 Returns `DateTime(year, month, 1)`.
 ```dart
-// Wheel Slider style
+// Wheel Slider or Normal Grid style
 final DateTime? monthYear = await showDatePickrMonthYear(
   context: context,
   style: DatePickrStyle.slider, // or DatePickrStyle.normal
+  onlyCompleted: true,          // Disables ongoing month and future months
   initialDate: DateTime.now(),
   firstDate: DateTime(2020, 1, 1),
   lastDate: DateTime(2030, 12, 31),
@@ -100,7 +101,7 @@ Returns `DateTime(year, 1, 1)`.
 final DateTime? year = await showDatePickrYear(
   context: context,
   style: DatePickrStyle.slider, // or DatePickrStyle.normal
-  onlyCompletedYears: true,      // Disables current year and future years
+  onlyCompleted: true,          // Disables current year and future years
   initialDate: DateTime.now(),
   subTitle: 'Choose Year',
 );
@@ -158,7 +159,7 @@ DatePickr(
 // Year Picker (Only Completed Past Years)
 DatePickr(
   type: DatePickrType.year,
-  onlyCompletedYears: true,
+  onlyCompleted: true,
   onSelected: (DateTime date) {
     print('Selected Year: $date');
   },
@@ -184,7 +185,7 @@ DatePickr(
 | `selectedDateRange` | `DateTimeRange?` | `null` | Currently selected range value. |
 | `firstDate` | `DateTime?` | 200 years past | Earliest selectable date boundary. |
 | `lastDate` | `DateTime?` | 200 years future | Latest selectable date boundary. |
-| `onlyCompletedYears` | `bool` | `false` | When `true`, disables the current ongoing year and future years. |
+| `onlyCompleted` | `bool` | `false` | When `true`, disables ongoing/incomplete periods (current month & future for month picker; current year & future for year picker). |
 | `onSelected` | `ValueChanged<DateTime>?` | `null` | Callback returning confirmed `DateTime`. |
 | `onRangeSelected` | `ValueChanged<DateTimeRange>?` | `null` | Callback returning confirmed `DateTimeRange`. |
 | `primaryColor` | `Color?` | `Theme primary` | Explicit theme accent color override. |
@@ -211,11 +212,10 @@ DatePickr(
 ### Boundary Handling (`firstDate` and `lastDate`)
 Months and years outside the range defined by `firstDate` and `lastDate` are automatically disabled and rendered with disabled styling. Navigation chevrons also respect boundaries to prevent navigating to inaccessible ranges.
 
-### Completed Years Filter (`onlyCompletedYears`)
-When `onlyCompletedYears: true`:
-- The current year (e.g. 2026) and all future years are disabled.
-- Only fully concluded past years (e.g. 2025 and earlier) can be selected.
-- Ideal for annual financial statements, tax reporting, and historical audit periods.
+### Completed Periods Filter (`onlyCompleted`)
+When `onlyCompleted: true`:
+- **Month Picker**: The current ongoing month and all future months are disabled. Only fully concluded past months can be selected. In January, rolls back automatically so that the latest selectable month is December of the previous year. Ideal for monthly financial closings, payroll cycles, billing statements, and monthly KPIs.
+- **Year Picker**: The current ongoing year (e.g. 2026) and all future years are disabled. Only fully concluded past years (e.g. 2025 and earlier) can be selected. Ideal for annual financial statements, tax reporting, and historical audit periods.
 
 ---
 

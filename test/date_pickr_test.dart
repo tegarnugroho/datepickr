@@ -202,6 +202,47 @@ void main() {
     });
 
     testWidgets(
+        'DatePickr with month type and onlyCompleted disables current month and selects completed month',
+        (WidgetTester tester) async {
+      DateTime? result;
+      final now = DateTime.now();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DatePickr(
+              key: const Key('month_picker_only_completed_months'),
+              type: DatePickrType.month,
+              initialDate: now,
+              onlyCompleted: true,
+              child: const Text('Pick a month'),
+              onSelected: (DateTime dateTime) {
+                result = dateTime;
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Pick a month'));
+      await tester.pumpAndSettle();
+
+      final okFinder = find.widgetWithText(TextButton, 'OK');
+      expect(okFinder, findsOneWidget);
+
+      await tester.tap(okFinder);
+      await tester.pumpAndSettle();
+
+      expect(result, isNotNull);
+      final expectedMaxDate = DateTime(now.year, now.month, 0);
+      expect(
+        result!.isBefore(DateTime(expectedMaxDate.year, expectedMaxDate.month + 1, 1)),
+        isTrue,
+      );
+    });
+
+    testWidgets(
         'DatePickr with year type shows YearPicker and selects completed year',
         (WidgetTester tester) async {
       DateTime? result;
@@ -239,7 +280,7 @@ void main() {
     });
 
     testWidgets(
-        'DatePickr with year type disables current year when onlyCompletedYears is true',
+        'DatePickr with year type disables current year when onlyCompleted is true',
         (WidgetTester tester) async {
       DateTime? result;
       final now = DateTime.now();
@@ -251,7 +292,7 @@ void main() {
             body: DatePickr(
               key: const Key('unfinished_year_picker'),
               type: DatePickrType.year,
-              onlyCompletedYears: true,
+              onlyCompleted: true,
               initialDate: initialDate,
               child: const Text('Pick a year'),
               onSelected: (DateTime dateTime) {

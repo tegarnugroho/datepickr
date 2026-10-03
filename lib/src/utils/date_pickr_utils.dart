@@ -60,20 +60,29 @@ class DatePickrUtils {
     }
   }
 
-  /// Checks if [month] is outside the [firstDate] and [lastDate] boundary for [selectedYear].
+  /// Checks if [month] is outside the [firstDate] and [lastDate] boundary for [selectedYear],
+  /// or if [onlyCompleted] is true and [month] is not a completed past month.
   static bool isMonthDisabled({
     required int month,
     required int selectedYear,
     required DateTime firstDate,
     required DateTime lastDate,
+    bool onlyCompleted = false,
   }) {
-    if (selectedYear < firstDate.year || selectedYear > lastDate.year) {
+    final now = DateTime.now();
+    final effectiveLastDate = onlyCompleted
+        ? (DateTime(now.year, now.month, 0).isBefore(lastDate)
+            ? DateTime(now.year, now.month, 0)
+            : lastDate)
+        : lastDate;
+
+    if (selectedYear < firstDate.year || selectedYear > effectiveLastDate.year) {
       return true;
     }
     if (selectedYear == firstDate.year && month < firstDate.month) {
       return true;
     }
-    if (selectedYear == lastDate.year && month > lastDate.month) {
+    if (selectedYear == effectiveLastDate.year && month > effectiveLastDate.month) {
       return true;
     }
     return false;
@@ -86,7 +95,7 @@ class DatePickrUtils {
     required DateTime firstDate,
     required DateTime lastDate,
     DateTime? explicitLastDate,
-    bool onlyCompletedYears = false,
+    bool onlyCompleted = false,
   }) {
     final maxYear = getTargetValidYear(
       currentYear: year,
@@ -94,7 +103,7 @@ class DatePickrUtils {
       firstDate: firstDate,
       lastDate: lastDate,
       explicitLastDate: explicitLastDate,
-      onlyCompletedYears: onlyCompletedYears,
+      onlyCompleted: onlyCompleted,
     );
     return year < firstDate.year || year > maxYear;
   }
@@ -106,10 +115,10 @@ class DatePickrUtils {
     required DateTime firstDate,
     required DateTime lastDate,
     DateTime? explicitLastDate,
-    bool onlyCompletedYears = false,
+    bool onlyCompleted = false,
   }) {
     final now = DateTime.now();
-    final maxYear = (type == DatePickrType.year && onlyCompletedYears)
+    final maxYear = (type == DatePickrType.year && onlyCompleted)
         ? min(explicitLastDate?.year ?? now.year - 1, now.year - 1)
         : (explicitLastDate?.year ?? lastDate.year);
     return currentYear.clamp(firstDate.year, maxYear);
@@ -121,9 +130,18 @@ class DatePickrUtils {
     required int selectedYear,
     required DateTime firstDate,
     required DateTime lastDate,
+    bool onlyCompleted = false,
   }) {
+    final now = DateTime.now();
+    final effectiveLastDate = onlyCompleted
+        ? (DateTime(now.year, now.month, 0).isBefore(lastDate)
+            ? DateTime(now.year, now.month, 0)
+            : lastDate)
+        : lastDate;
+
     final minMonth = selectedYear == firstDate.year ? firstDate.month : 1;
-    final maxMonth = selectedYear == lastDate.year ? lastDate.month : 12;
+    final maxMonth =
+        selectedYear == effectiveLastDate.year ? effectiveLastDate.month : 12;
     return currentMonth.clamp(minMonth, maxMonth);
   }
 }

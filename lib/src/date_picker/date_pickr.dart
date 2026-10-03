@@ -26,7 +26,7 @@ class DatePickr extends StatelessWidget {
     this.confirmText,
     this.cancelText,
     this.locale,
-    this.onlyCompletedYears = false,
+    this.onlyCompleted = false,
     this.primaryColor,
     this.fullScreen = true,
   });
@@ -76,8 +76,11 @@ class DatePickr extends StatelessWidget {
   /// Locale for localization.
   final Locale? locale;
 
-  /// Whether to only allow fully completed past years.
-  final bool onlyCompletedYears;
+  /// Whether to only allow fully completed past periods.
+  ///
+  /// For [DatePickrType.year], this disables the current ongoing year and future years.
+  /// For [DatePickrType.month], this disables the current ongoing month and future months.
+  final bool onlyCompleted;
 
   /// Optional override for the primary theme color.
   final Color? primaryColor;
@@ -138,7 +141,7 @@ class DatePickr extends StatelessWidget {
             confirmText: confirmText,
             cancelText: cancelText,
             locale: locale,
-            onlyCompletedYears: onlyCompletedYears,
+            onlyCompleted: onlyCompleted,
             primaryColor: primaryColor,
           );
         } else {
@@ -154,7 +157,7 @@ class DatePickr extends StatelessWidget {
             confirmText: confirmText,
             cancelText: cancelText,
             locale: locale,
-            onlyCompletedYears: onlyCompletedYears,
+            onlyCompleted: onlyCompleted,
             primaryColor: primaryColor,
           );
         }
